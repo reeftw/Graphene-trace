@@ -1,0 +1,38 @@
+﻿@model HeatmapMVC.Models.HeatmapModel
+
+<h2>Matrix <span id="matrix-number">@(Model.MatrixIndex + 1)</span> / @Model.TotalMatrices</h2>
+
+<label for="matrixRange">Select Matrix:</label>
+<input type="range" id="matrixRange" min="0" max="@(Model.TotalMatrices - 1)" value="@Model.MatrixIndex">
+
+<div id="heatmap-container">
+    @Html.Partial("_HeatmapPartial", Model)
+</div>
+
+<style>
+    table {
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    td {
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $("#matrixRange").on("input", function(){
+            var index = $(this).val();
+            $("#matrix-number").text(parseInt(index)+1);
+
+            $.get("/Home/HeatmapPartial", { index: index }, function(data){
+                $("#heatmap-container").html(data);
+            });
+        });
+    });
+</script>
+

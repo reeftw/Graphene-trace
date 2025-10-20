@@ -1,0 +1,30 @@
+﻿@model HeatmapMVC.Models.HeatmapModel
+
+<table>
+@{
+    int rows = Model.Data.GetLength(0);
+    int cols = Model.Data.GetLength(1);
+
+    string GetColor(double value)
+    {
+        value = Math.Clamp(value, 0, 1);
+        int r, g, b;
+        if (value < 0.33) { double t=value/0.33; r=0; g=(int)(255*t); b=(int)(255*(1-t)); }
+        else if (value<0.66) { double t=(value-0.33)/0.33; r=(int)(255*t); g=255; b=0; }
+        else { double t=(value-0.66)/0.34; r=255; g=(int)(255*(1-t)); b=0; }
+
+        return $"rgb({r},{g},{b})";
+    }
+
+    for(int i=0;i<rows;i++)
+    {
+        @:<tr>
+        for(int j=0;j<cols;j++)
+        {
+            string color = GetColor((double)(Model.Data[i,j]-Model.Min)/(Model.Max-Model.Min));
+            @:<td style="width:15px;height:15px;background-color:@color;"></td>
+        }
+        @:</tr>
+    }
+}
+</table>
