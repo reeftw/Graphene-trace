@@ -1,0 +1,85 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|c:\\users\\rejoi\\source\\repos\\admindashboard\\admindashboard\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|solutionrelative:admindashboard\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|c:\\users\\rejoi\\source\\repos\\admindashboard\\admindashboard\\views\\home\\admin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|solutionrelative:admindashboard\\views\\home\\admin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|c:\\users\\rejoi\\source\\repos\\admindashboard\\admindashboard\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|solutionrelative:admindashboard\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|c:\\users\\rejoi\\source\\repos\\admindashboard\\admindashboard\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{518782C1-84D6-4FB1-BEF3-A61341A9BBD6}|AdminDashboard\\AdminDashboard.csproj|solutionrelative:admindashboard\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "AdminDashboard\\Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "AdminDashboard\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAqwFUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-22T21:29:09.945Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Program.cs",
+              "RelativeDocumentMoniker": "AdminDashboard\\Program.cs",
+              "ToolTip": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Program.cs",
+              "RelativeToolTip": "AdminDashboard\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-22T13:57:25.101Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "AdminDashboard\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "AdminDashboard\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-22T13:47:59.142Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Admin.cshtml",
+              "DocumentMoniker": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Views\\Home\\Admin.cshtml",
+              "RelativeDocumentMoniker": "AdminDashboard\\Views\\Home\\Admin.cshtml",
+              "ToolTip": "C:\\Users\\rejoi\\source\\repos\\AdminDashboard\\AdminDashboard\\Views\\Home\\Admin.cshtml",
+              "RelativeToolTip": "AdminDashboard\\Views\\Home\\Admin.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADcBAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-22T13:23:33.043Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
