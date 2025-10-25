@@ -69,7 +69,7 @@ namespace AdminDashboard.Controllers
 
         private string GenerateRandomId()
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
             var random = new Random();
             return new string(Enumerable.Repeat(chars, 8)
               .Select(s => s[random.Next(s.Length)]).ToArray());
