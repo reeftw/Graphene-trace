@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GrapheneTrace")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f8bab035c78c8a2f5a74359e7a77da32640879b3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f10c4313319797ee3f2a8274a336cf8aa14fb345")]
 [assembly: System.Reflection.AssemblyProductAttribute("GrapheneTrace")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GrapheneTrace")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

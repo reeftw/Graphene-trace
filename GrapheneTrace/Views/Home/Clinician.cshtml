@@ -1,0 +1,212 @@
+@{
+    // Ensure the model is defined if your controller returns one, though not strictly required
+    // if using generic JsonResult calls as planned.
+    ViewData["Title"] = "Clinician Portal";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Clinician Data Review Portal</h1>
+    
+    <style>
+        /* --- Styles for Full Heatmap (32x32) --- */
+        .full-heatmap-table { /* Renamed for clarity */
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 320px; 
+            height: 320px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .full-heatmap-table td {
+            border: none;
+            padding: 0;
+            margin: 0;
+            width: 10px;
+            height: 10px;
+            transition: background-color 0.2s ease-out;
+        }
+        /* --- Styles for Mini Heatmap (8x8 Preview) --- */
+        .mini-heatmap-table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            /* Set the final size in JS for best results, but keep base classes */
+        }
+        .mini-heatmap-table td {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+
+    <div id="patientList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow-lg p-6 col-span-full text-center text-gray-500">
+            <p>Fetching data from C# backend...</p>
+        </div>
+    </div>
+
+    <div id="heatmapModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-2xl font-bold">Patient Pressure Map</h2>
+                <button onclick="closeHeatmapModal()" class="text-gray-600 hover:text-gray-800">
+                    <span class="text-2xl">&times;</span>
+                </button>
+            </div>
+            <div id="heatmapContainer">
+                </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Renaming loadPatientData to fetchPatientGroups for clarity, aligning with C#
+            fetchPatientGroups();
+        });
+
+        // --- Core Data Fetching Functions ---
+
+        function fetchPatientGroups() {
+            // Call C# controller to get the JSON list of patients and their summarized files
+            $.get('/Home/GetPatientFilesMetadata')
+                .done(function(data) {
+                    const patientList = $('#patientList');
+                    patientList.empty();
+                    
+                    if (data.length === 0) {
+                        patientList.append('<div class="bg-yellow-50 rounded-lg shadow-lg p-6 col-span-full text-center text-yellow-800"><p>No patient data found. Ensure your C# server is running and the GTLB-Data folder has files.</p></div>');
+                        return;
+                    }
+
+                    data.forEach(patientGroup => {
+                        const patientCard = createPatientCard(patientGroup);
+                        patientList.append(patientCard);
+                    });
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    $('#patientList').html('<div class="bg-red-100 rounded-lg shadow-lg p-6 col-span-full text-center text-red-800"><p>ERROR: Failed to load data. Server communication failed.</p></div>');
+                    console.error("AJAX Error loading patient metadata:", textStatus, errorThrown);
+                });
+        }
+
+        // --- Card Rendering Functions ---
+
+        function createPatientCard(patientGroup) {
+            const card = $('<div>').addClass('bg-white rounded-lg shadow-lg p-6');
+            
+            // Add patient ID header and risk indicator (use camelCase from JSON)
+            const hasAlert = (patientGroup.files || []).some(f => f.isAlert);
+            const header = $('<h3>').addClass('text-xl font-bold mb-4 flex justify-between items-center')
+                .append($('<span>').text(`Patient ID: ${patientGroup.patientId || patientGroup.PatientId}`))
+                .append(hasAlert ? $('<span>').addClass('bg-red-500 text-white text-xs px-2 py-1 rounded-full font-normal').text('HIGH ALERT') : '');
+            
+            card.append(header);
+            
+            // Create container for file entries
+            const fileList = $('<div>').addClass('space-y-4');
+            
+            // Sort files by alert status for better triage visualization
+            const files = patientGroup.files || patientGroup.Files || [];
+            files.sort((a, b) => ((b.isAlert === true) ? 1 : 0) - ((a.isAlert === true) ? 1 : 0));
+
+            files.forEach(file => {
+                const fileEntry = createFileEntry(patientGroup.patientId || patientGroup.PatientId, file);
+                fileList.append(fileEntry);
+            });
+            
+            card.append(fileList);
+            return card;
+        }
+
+        function createFileEntry(patientId, file) {
+            // Note: file object now contains SmallMatrix, PeakPressure, ContactArea, IsAlert directly
+            
+            const entry = $('<div>').addClass('border rounded p-4 hover:bg-gray-50 transition duration-150 cursor-pointer')
+                // Call showHeatmap, passing the file's unique ID
+                .click(() => showHeatmap(patientId, file.fileName || file.FileName));
+            
+            // Mini matrix visualization
+            const miniHeatmap = createMiniHeatmap(file.smallMatrix || file.SmallMatrix);
+            
+            // Metrics section
+            const metrics = $('<div>').addClass('ml-4 flex-grow')
+                .append($('<h4>').addClass('font-medium').text(file.fileName || file.FileName))
+                .append($('<p>').addClass('text-sm text-gray-600')
+                    .text(`Peak: ${file.peakPressure || file.PeakPressure} mmHg | Area: ${file.contactArea || file.ContactArea}%`));
+            
+            // Combine mini heatmap and metrics in a flex container
+            const container = $('<div>').addClass('flex items-start');
+            container.append(miniHeatmap).append(metrics);
+            
+            entry.append(container);
+            return entry;
+        }
+
+        function createMiniHeatmap(matrix) {
+            // We expect an 8x8 matrix subset from the server
+            const table = $('<table>').addClass('mini-heatmap-table').css({
+                'width': '64px',
+                'height': '64px'
+            });
+            
+            matrix.forEach(row => {
+                const tr = $('<tr>');
+                row.forEach(value => {
+                    // Use a standardized color scale function (copied from helper function in C#)
+                    const colorClass = getClientColorClass(value);
+                    const td = $('<td>').addClass(colorClass).css({
+                        'width': '8px', // 64px / 8 cells
+                        'height': '8px' 
+                    });
+                    tr.append(td);
+                });
+                table.append(tr);
+            });
+            
+            return table;
+        }
+
+        // Mirrors the color logic used in the C# backend for consistency
+        function getClientColorClass(pressure) {
+            if (pressure < 20) return 'bg-blue-800';
+            if (pressure < 40) return 'bg-blue-600';
+            if (pressure < 60) return 'bg-cyan-500';
+            if (pressure < 80) return 'bg-teal-400';
+            if (pressure < 100) return 'bg-lime-300';
+            if (pressure < 120) return 'bg-yellow-400';
+            if (pressure < 150) return 'bg-amber-500';
+            if (pressure < 180) return 'bg-orange-600';
+            if (pressure < 220) return 'bg-red-700';
+            return 'bg-red-900';
+        }
+
+        // --- Modal/Full View Functions ---
+
+        function showHeatmap(patientId, fileName) {
+            // 1. Set modal title and show loading spinner
+            $('#modalTitle').text(`Pressure Map: ${fileName}`);
+            $('#heatmapContainer').html('<div class="text-center py-8 text-purple-600">Loading full map and metrics...</div>');
+            $('#heatmapModal').removeClass('hidden');
+
+            // 2. Call C# controller to get the full HTML partial view
+            $.get(`/Home/GetHeatmapPartial?patientId=${patientId}&fileName=${fileName}`)
+                .done(function(data) {
+                    // C# returns the fully rendered HTML (heatmap table + hidden metrics)
+                    $('#heatmapContainer').html(data);
+                    
+                    // Note: If you want to add the dynamic metric cards next to the heatmap, 
+                    // you would separate the injection of the heatmap table from the metric update.
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    $('#heatmapContainer').html('<div class="text-red-600">Error loading map. Check C# logs.</div>');
+                    console.error("AJAX Error loading full heatmap:", textStatus, errorThrown);
+                });
+        }
+
+        function closeHeatmapModal() {
+            $('#heatmapModal').addClass('hidden');
+            $('#heatmapContainer').empty();
+        }
+    </script>
+}
