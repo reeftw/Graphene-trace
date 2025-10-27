@@ -8,24 +8,31 @@
     "net9.0": []
   },
   "packageFolders": {
-    "/Users/vivekvarijakshan/.nuget/packages/": {}
+    "C:\\Users\\rejoi\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
+      "projectUniqueName": "C:\\Users\\rejoi\\Downloads\\Graphene-trace\\GrapheneTrace\\GrapheneTrace.csproj",
       "projectName": "GrapheneTrace",
-      "projectPath": "/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
-      "packagesPath": "/Users/vivekvarijakshan/.nuget/packages/",
-      "outputPath": "/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/",
+      "projectPath": "C:\\Users\\rejoi\\Downloads\\Graphene-trace\\GrapheneTrace\\GrapheneTrace.csproj",
+      "packagesPath": "C:\\Users\\rejoi\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\rejoi\\Downloads\\Graphene-trace\\GrapheneTrace\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/Users/vivekvarijakshan/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\rejoi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -68,7 +75,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

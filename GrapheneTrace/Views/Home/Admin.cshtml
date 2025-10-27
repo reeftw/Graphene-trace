@@ -313,6 +313,38 @@
         });
     </script>
 
+    
+<script>
+    const clinicians = [
+        "John Doe - Cardiologist",
+        "Jane Smith - Neurologist",
+        "Robert Brown - Surgeon"
+    ];
+
+    let patients = []; // will be filled dynamically
+
+    async function loadPatients() {
+        try {
+            const response = await fetch('/Home/GetPatientFiles');
+            if (!response.ok) throw new Error("Failed to fetch patients");
+            patients = await response.json();
+
+            // Convert patient IDs into readable list items
+            patients = patients.map(p => `${p}`);
+
+            // Update UI immediately
+            if (document.getElementById('patients-btn').classList.contains('active')) {
+                updateSearchResults(patients);
+            }
+        } catch (err) {
+            console.error('Error loading patients:', err);
+        }
+    }
+
+    // Call the function when the page loads
+    window.addEventListener('DOMContentLoaded', loadPatients);
+</script>
+
     <script>
         const cliniciansBtn = document.getElementById('clinicians-btn');
         const patientsBtn = document.getElementById('patients-btn');
@@ -320,17 +352,6 @@
         const searchBar = document.getElementById('search-bar');
         const searchResults = document.getElementById('search-results');
 
-        const clinicians = [
-            "John Doe - Cardiologist",
-            "Jane Smith - Neurologist",
-            "Robert Brown - Surgeon"
-        ];
-
-        const patients = [
-            "Alice Johnson - Age 45",
-            "Michael Lee - Age 60",
-            "Emma Davis - Age 30"
-        ];
 
         function updateSearchResults(list) {
             let html = '<ul class="list-group">';
