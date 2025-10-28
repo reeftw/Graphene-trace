@@ -11,6 +11,7 @@
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/bin/Debug/net9.0/GrapheneTrace.pdb
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/rpswa.dswa.cache.json
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.GeneratedMSBuildEditorConfig.editorconfig
+/Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.AssemblyInfoInputs.cache
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.csproj.CoreCompileInputs.cache
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.MvcApplicationPartsAssemblyInfo.cache
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.RazorAssemblyInfo.cache
@@ -22,6 +23,7 @@
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/scopedcss/bundle/GrapheneTrace.styles.css
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/scopedcss/projectbundle/GrapheneTrace.bundle.scp.css
+/Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/77u0y0ef8d-lng0pnq83m.gz
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/vw95pcb6c6-61n19gt1b8.gz
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/g8eu300sdj-hcqtc2xeyx.gz
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/jvdnw68ml8-y5memwkelc.gz
@@ -109,4 +111,3 @@
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.pdb
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.genruntimeconfig.cache
 /Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/ref/GrapheneTrace.dll
-/Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/77u0y0ef8d-lng0pnq83m.gz

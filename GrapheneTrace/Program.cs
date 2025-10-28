@@ -7,7 +7,7 @@ namespace GrapheneTrace
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews(); 
+            builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
@@ -22,10 +22,10 @@ namespace GrapheneTrace
 
             // CRITICAL FIX 1: This enables the server to find and serve static files 
             // (like your renamed clinician.html and GTLB-Data inside wwwroot).
-            app.UseStaticFiles(); 
+            app.UseStaticFiles();
 
             app.UseRouting();
-            
+
             app.UseAuthorization();
 
             // CRITICAL FIX 2: This standard method ensures the root URL (/) maps to Home/Index.

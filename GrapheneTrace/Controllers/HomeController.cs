@@ -4,10 +4,9 @@ using GrapheneTrace.ViewModels;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Hosting; 
+using Microsoft.AspNetCore.Hosting;
 using System;
 using Microsoft.Extensions.Logging;
-
 
 namespace GrapheneTrace.Controllers
 {
@@ -17,7 +16,7 @@ namespace GrapheneTrace.Controllers
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly ILogger<HomeController> _logger;
         // CRITICAL FIX: Looks for the GTLB-Data folder inside the wwwroot folder
-        private const string DATA_FOLDER_NAME = "wwwroot/GTLBData"; 
+        private const string DATA_FOLDER_NAME = "wwwroot/GTLBData";
         private const int MATRIX_SIZE = 32;
         private const int ALERT_THRESHOLD = 200;
         private const int MIN_CONTACT_PRESSURE = 10;
@@ -152,11 +151,11 @@ namespace GrapheneTrace.Controllers
                 // fallback: files might be directly under GTLBData with names like <patient>_date.csv
                 fullPath = Path.Combine(baseDataPath, fileName);
             }
-            
+
             try
             {
-                int[,] requestedMatrix = LoadSingleMatrix(fullPath); 
-                
+                int[,] requestedMatrix = LoadSingleMatrix(fullPath);
+
                 // Convert 2D array (int[,]) to List of Lists (List<List<int>>) for model compatibility
                 var matrixAsList = new List<List<int>>();
                 for (int i = 0; i < MATRIX_SIZE; i++)
@@ -170,8 +169,8 @@ namespace GrapheneTrace.Controllers
 
                 var model = new HeatmapData { PressureMatrix = matrixAsList, TotalMatrices = 1 };
                 CalculateMetrics(model); // Calculate the final metrics
-                
-                return PartialView("_HeatmapPartial", model); 
+
+                return PartialView("_HeatmapPartial", model);
             }
             catch (FileNotFoundException)
             {
@@ -211,7 +210,7 @@ namespace GrapheneTrace.Controllers
                     }
                     else
                     {
-                         mat[i, j] = 0; // Default to 0 if parsing fails or column is missing
+                        mat[i, j] = 0; // Default to 0 if parsing fails or column is missing
                     }
                 }
             }
@@ -221,10 +220,8 @@ namespace GrapheneTrace.Controllers
         // Reads the CSV file and calculates metrics for the summary list view
         private PatientFile ReadAndSummarizeCsv(string path, string patientId, string fileName)
         {
-            // CS0168 Fix: Exception variable is now used in Console.WriteLine or logging. (Not applicable to this method, but shown in others)
-            
             var lines = System.IO.File.ReadLines(path).Take(MATRIX_SIZE).ToList();
-            
+
             int maxPressure = 0;
             int contactCount = 0;
             const int TOTAL_PIXELS = MATRIX_SIZE * MATRIX_SIZE;
@@ -236,8 +233,8 @@ namespace GrapheneTrace.Controllers
             {
                 var row = lines[i].Split(',');
                 var miniRow = new List<int>();
-                
-                for (int j = 0; j < row.Length && j < MATRIX_SIZE; j++) 
+
+                for (int j = 0; j < row.Length && j < MATRIX_SIZE; j++)
                 {
                     if (int.TryParse(row[j].Trim(), out int val))
                     {
@@ -252,12 +249,12 @@ namespace GrapheneTrace.Controllers
                         }
                     }
                 }
-                if (i % (MATRIX_SIZE / MATRIX_PREVIEW_SIZE) == 0) 
+                if (i % (MATRIX_SIZE / MATRIX_PREVIEW_SIZE) == 0)
                 {
                     miniMatrix.Add(miniRow.Take(MATRIX_PREVIEW_SIZE).ToList());
                 }
             }
-            
+
             // Calculate final metrics
             bool isAlert = maxPressure >= ALERT_THRESHOLD;
             float contactAreaPercentFloat = (float)Math.Round((double)contactCount / TOTAL_PIXELS * 100.0);
@@ -278,33 +275,56 @@ namespace GrapheneTrace.Controllers
             int maxPressure = 0;
             int contactCount = 0;
             const int TOTAL_PIXELS = MATRIX_SIZE * MATRIX_SIZE;
-            
-            foreach(var row in model.PressureMatrix)
+
+            foreach (var row in model.PressureMatrix)
             {
-                foreach(var val in row)
+                foreach (var val in row)
                 {
                     maxPressure = Math.Max(maxPressure, val);
                     if (val >= MIN_CONTACT_PRESSURE) contactCount++;
                 }
             }
-            
+
             model.PeakPressureIndex = maxPressure;
             float contactAreaPercentFloat = (float)Math.Round((double)contactCount / TOTAL_PIXELS * 100.0);
             model.ContactAreaPercent = (int)contactAreaPercentFloat; // CS0266 FIX: Explicit cast to int
             model.IsAlertGenerated = maxPressure >= ALERT_THRESHOLD;
         }
+
+        // Small utility actions
         public IActionResult Search(string searchQuery)
         {
             // In a real app: log, redirect to a search results page, or update the current view
             // For now, just redirects back to the patient homepage
             return RedirectToAction("Patient");
-
         }
+
         public new IActionResult SignOut()
         {
             // In a real app: clear session, cookies, etc.
             // For now, just redirects back to the homepage
             return RedirectToAction("Index", "Home"); // Example sign-out destination
+        }
+
+        [HttpGet]
+        public IActionResult GetPatientFiles()
+        {
+            string folderPath = Path.Combine(_hostingEnvironment.WebRootPath, "GTLBData");
+            var patients = new List<string>();
+
+            if (Directory.Exists(folderPath))
+            {
+                var files = Directory.GetFiles(folderPath, "*.csv");
+
+                patients = files.Select(file =>
+                {
+                    var name = Path.GetFileNameWithoutExtension(file);
+                    var parts = name.Split('_');
+                    return parts.Length > 0 ? parts[0] : name;
+                }).Distinct().ToList();
+            }
+
+            return Json(patients);
         }
     }
 }
