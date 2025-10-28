@@ -16,8 +16,9 @@ namespace GrapheneTrace.Controllers
     {
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly ILogger<HomeController> _logger;
-        // CRITICAL FIX: Looks for the GTLB-Data folder inside the wwwroot folder
+
         private const string DATA_FOLDER_NAME = "wwwroot/GTLBData";
+        private const string COMMENTS_FOLDER_NAME = "wwwroot/GTLBComments";
         private const int MATRIX_SIZE = 32;
         private const int ALERT_THRESHOLD = 200;
         private const int MIN_CONTACT_PRESSURE = 10;
@@ -53,25 +54,20 @@ namespace GrapheneTrace.Controllers
         [HttpGet]
         public IActionResult GetPatientFilesMetadata()
         {
-            // Path is constructed: ContentRoot/wwwroot/GTLB-Data
             string dataRootPath = Path.Combine(_hostingEnvironment.ContentRootPath, DATA_FOLDER_NAME);
             var patientGroups = new List<PatientGroup>();
 
             if (!Directory.Exists(dataRootPath))
             {
-                // Graceful failure: return empty JSON list if folder is missing
                 _logger.LogWarning("GTLB-Data folder not found at: {DataRootPath}", dataRootPath);
                 return Json(patientGroups);
             }
 
-            // Get all subdirectories (which represent Patient IDs)
             var patientDirectories = Directory.GetDirectories(dataRootPath);
 
-            // If there are no subdirectories, support CSV files placed directly in the GTLBData folder
             if (patientDirectories.Length == 0)
             {
                 var filesInRoot = Directory.GetFiles(dataRootPath, "*.csv");
-                // Group files by prefix before first underscore (e.g. patientId_date.csv -> patientId)
                 var grouped = filesInRoot.GroupBy(fp =>
                 {
                     var fname = Path.GetFileNameWithoutExtension(fp);
@@ -104,33 +100,27 @@ namespace GrapheneTrace.Controllers
                 {
                     string patientId = new DirectoryInfo(patientDir).Name;
                     var group = new PatientGroup { PatientId = patientId };
-
-                    // Get all CSV files inside the patient folder
                     var files = Directory.GetFiles(patientDir, "*.csv");
 
                     foreach (var filePath in files)
                     {
                         try
                         {
-                            // Read and process the first few lines for the summary/mini-map
                             var summaryData = ReadAndSummarizeCsv(filePath, patientId, Path.GetFileName(filePath));
                             group.Files.Add(summaryData);
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, "Error processing file {FilePath}", filePath);
-                            // Skip problematic file
                         }
                     }
-                    // Only add patient group if files were successfully processed
                     if (group.Files.Any())
                     {
                         patientGroups.Add(group);
                     }
                 }
             }
-
-            // This JSON response is what your clinician.html JavaScript uses to draw the list
+            
             return Json(patientGroups);
         }
 
@@ -138,8 +128,6 @@ namespace GrapheneTrace.Controllers
         [HttpGet]
         public IActionResult GetHeatmapPartial(string patientId, string fileName)
         {
-            // Construct the path: prefer ContentRoot/wwwroot/GTLBData/PatientId/FileName.csv
-            // but fall back to ContentRoot/wwwroot/GTLBData/FileName.csv if patient folders are not used
             string baseDataPath = Path.Combine(_hostingEnvironment.ContentRootPath, DATA_FOLDER_NAME);
             string patientFolderPath = Path.Combine(baseDataPath, patientId ?? string.Empty);
             string fullPath;
@@ -149,15 +137,13 @@ namespace GrapheneTrace.Controllers
             }
             else
             {
-                // fallback: files might be directly under GTLBData with names like <patient>_date.csv
                 fullPath = Path.Combine(baseDataPath, fileName);
             }
 
             try
             {
                 int[,] requestedMatrix = LoadSingleMatrix(fullPath);
-
-                // Convert 2D array (int[,]) to List of Lists (List<List<int>>) for model compatibility
+                
                 var matrixAsList = new List<List<int>>();
                 for (int i = 0; i < MATRIX_SIZE; i++)
                 {
@@ -169,26 +155,132 @@ namespace GrapheneTrace.Controllers
                 }
 
                 var model = new HeatmapData { PressureMatrix = matrixAsList, TotalMatrices = 1 };
-                CalculateMetrics(model); // Calculate the final metrics
+                CalculateMetrics(model); 
 
                 return PartialView("_HeatmapPartial", model);
             }
             catch (FileNotFoundException)
             {
                 _logger.LogWarning("Requested file not found: {FullPath}", fullPath);
-                return NotFound($"File not found: {fullPath}. Check file placement in GTLB-Data/{patientId}/");
+                return NotFound($"File not found: {fullPath}.");
             }
             catch (Exception ex)
             {
-                // General error catching for parsing or reading issues
                 _logger.LogError(ex, "Error processing data for file {FullPath}", fullPath);
                 return StatusCode(500, $"Error processing data: {ex.Message}");
             }
         }
 
-        // --- PRIVATE HELPER METHODS (Required for core functionality) ---
+        // --- Action to save a comment ---
+        [HttpPost]
+        public IActionResult SaveComment(string patientId, string fileName, string comment)
+        {
+            if (string.IsNullOrWhiteSpace(patientId) || string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(comment))
+            {
+                return BadRequest("Missing required data.");
+            }
 
-        // Loads only a SINGLE 32x32 matrix from a given file path.
+            try
+            {
+                string commentsRootPath = Path.Combine(_hostingEnvironment.ContentRootPath, COMMENTS_FOLDER_NAME);
+                Directory.CreateDirectory(commentsRootPath);
+                string commentFilePath = Path.Combine(commentsRootPath, $"{patientId}_comments.csv");
+
+                string timestamp = DateTime.UtcNow.ToString("o"); 
+                string cleanComment = $"\"{comment.Replace("\"", "\"\"")}\"";
+                string line = $"{timestamp},{fileName},{cleanComment}{Environment.NewLine}";
+
+                bool fileExists = System.IO.File.Exists(commentFilePath);
+                using (StreamWriter sw = new StreamWriter(commentFilePath, append: true))
+                {
+                    if (!fileExists)
+                    {
+                        sw.Write("Timestamp,FileName,Comment" + Environment.NewLine);
+                    }
+                    sw.Write(line);
+                }
+
+                return Ok(); 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving comment for patient {PatientId}", patientId);
+                return StatusCode(500, "An error occurred while saving the comment.");
+            }
+        }
+
+        // --- NEW: Action to get ALL comments ---
+        [HttpGet]
+        public IActionResult GetAllComments()
+        {
+            var allComments = new List<PatientCommentViewModel>();
+            string commentsRootPath = Path.Combine(_hostingEnvironment.ContentRootPath, COMMENTS_FOLDER_NAME);
+
+            if (!Directory.Exists(commentsRootPath))
+            {
+                return Json(allComments); 
+            }
+
+            try
+            {
+                var commentFiles = Directory.GetFiles(commentsRootPath, "*_comments.csv");
+
+                foreach (var filePath in commentFiles)
+                {
+                    string patientId = Path.GetFileNameWithoutExtension(filePath).Split('_')[0];
+                    
+                    var lines = System.IO.File.ReadLines(filePath).Skip(1);
+
+                    foreach (var line in lines)
+                    {
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+                        
+                        var firstCommaIndex = line.IndexOf(',');
+                        var secondCommaIndex = line.IndexOf(',', firstCommaIndex + 1);
+
+                        if (firstCommaIndex == -1 || secondCommaIndex == -1)
+                        {
+                            _logger.LogWarning("Skipping malformed comment line in {FilePath}: {Line}", filePath, line);
+                            continue;
+                        }
+                        
+                        try
+                        {
+                            var timestamp = line.Substring(0, firstCommaIndex);
+                            var fileName = line.Substring(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1);
+                            var comment = line.Substring(secondCommaIndex + 1);
+
+                            if (comment.StartsWith("\"") && comment.EndsWith("\""))
+                            {
+                                comment = comment.Substring(1, comment.Length - 2).Replace("\"\"", "\"");
+                            }
+
+                            allComments.Add(new PatientCommentViewModel
+                            {
+                                PatientId = patientId,
+                                Timestamp = timestamp,
+                                FileName = fileName,
+                                Comment = comment
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error parsing comment line in {FilePath}: {Line}", filePath, line);
+                        }
+                    }
+                }
+
+                return Json(allComments.OrderByDescending(c => c.Timestamp));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to read all comments from {CommentsRootPath}", commentsRootPath);
+                return StatusCode(500, "Error reading comments.");
+            }
+        }
+
+        // --- PRIVATE HELPER METHODS ---
+
         private int[,] LoadSingleMatrix(string path)
         {
             if (!System.IO.File.Exists(path))
@@ -196,7 +288,6 @@ namespace GrapheneTrace.Controllers
                 throw new FileNotFoundException("The specified data file was not found.", path);
             }
 
-            // Use ReadAllLines and Take(32) to get only one 32x32 frame
             var lines = System.IO.File.ReadLines(path).Take(MATRIX_SIZE).ToArray();
             int[,] mat = new int[MATRIX_SIZE, MATRIX_SIZE];
 
@@ -211,14 +302,13 @@ namespace GrapheneTrace.Controllers
                     }
                     else
                     {
-                        mat[i, j] = 0; // Default to 0 if parsing fails or column is missing
+                        mat[i, j] = 0;
                     }
                 }
             }
             return mat;
         }
 
-        // Reads the CSV file and calculates metrics for the summary list view
         private PatientFile ReadAndSummarizeCsv(string path, string patientId, string fileName)
         {
             var lines = System.IO.File.ReadLines(path).Take(MATRIX_SIZE).ToList();
@@ -239,11 +329,9 @@ namespace GrapheneTrace.Controllers
                 {
                     if (int.TryParse(row[j].Trim(), out int val))
                     {
-                        // Full matrix analysis for metrics
                         maxPressure = Math.Max(maxPressure, val);
                         if (val >= MIN_CONTACT_PRESSURE) contactCount++;
 
-                        // Mini-map matrix generation (Subsample by a factor of 32/8 = 4)
                         if (i % (MATRIX_SIZE / MATRIX_PREVIEW_SIZE) == 0 && j % (MATRIX_SIZE / MATRIX_PREVIEW_SIZE) == 0)
                         {
                             miniRow.Add(val);
@@ -255,8 +343,7 @@ namespace GrapheneTrace.Controllers
                     miniMatrix.Add(miniRow.Take(MATRIX_PREVIEW_SIZE).ToList());
                 }
             }
-
-            // Calculate final metrics
+            
             bool isAlert = maxPressure >= ALERT_THRESHOLD;
             float contactAreaPercentFloat = (float)Math.Round((double)contactCount / TOTAL_PIXELS * 100.0);
 
@@ -264,13 +351,12 @@ namespace GrapheneTrace.Controllers
             {
                 FileName = fileName,
                 PeakPressure = maxPressure,
-                ContactArea = (int)contactAreaPercentFloat, // CS0266 FIX: Explicit cast to int
+                ContactArea = (int)contactAreaPercentFloat,
                 IsAlert = isAlert,
-                SmallMatrix = miniMatrix // The 8x8 subset
+                SmallMatrix = miniMatrix
             };
         }
-
-        // Calculates Peak Pressure, Contact Area %, and Alert Status (for full view model)
+        
         private void CalculateMetrics(HeatmapData model)
         {
             int maxPressure = 0;
@@ -288,23 +374,20 @@ namespace GrapheneTrace.Controllers
 
             model.PeakPressureIndex = maxPressure;
             float contactAreaPercentFloat = (float)Math.Round((double)contactCount / TOTAL_PIXELS * 100.0);
-            model.ContactAreaPercent = (int)contactAreaPercentFloat; // CS0266 FIX: Explicit cast to int
+            model.ContactAreaPercent = (int)contactAreaPercentFloat;
             model.IsAlertGenerated = maxPressure >= ALERT_THRESHOLD;
         }
 
-        // Small utility actions
+        // --- Utility Actions ---
+
         public IActionResult Search(string searchQuery)
         {
-            // In a real app: log, redirect to a search results page, or update the current view
-            // For now, just redirects back to the patient homepage
             return RedirectToAction("Patient");
         }
 
         public new IActionResult SignOut()
         {
-            // In a real app: clear session, cookies, etc.
-            // For now, just redirects back to the homepage
-            return RedirectToAction("Index", "Home"); // Example sign-out destination
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -374,11 +457,11 @@ public IActionResult AddClinician([FromBody] ClinicianInput clinician)
 
         public class ClinicianInput
         {
-            public string Title { get; set; }
-            public string FirstName { get; set; }
-            public string MiddleName { get; set; }
-            public string LastName { get; set; }
-            public string IdNumber { get; set; }
+            public string Title { get; set; } = string.Empty;
+            public string FirstName { get; set; } = string.Empty;
+            public string MiddleName { get; set; } = string.Empty;
+            public string LastName { get; set; } = string.Empty;
+            public string IdNumber { get; set; } = string.Empty;
         }
 }
 }
