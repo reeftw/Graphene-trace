@@ -319,3 +319,8 @@ C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\refint\Gr
 C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\GrapheneTrace.pdb
 C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\GrapheneTrace.genruntimeconfig.cache
 C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\ref\GrapheneTrace.dll
+C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\compressed\qch2kuq64c-5ipweew5fc.gz
+C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\compressed\7y418co79g-5ipweew5fc.gz
+C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\compressed\jby3smmish-5ipweew5fc.gz
+C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\compressed\7in0sfbu27-5ipweew5fc.gz
+C:\Users\rejoi\Downloads\Graphene-trace\GrapheneTrace\obj\Debug\net9.0\compressed\qpescvjtf2-5ipweew5fc.gz
