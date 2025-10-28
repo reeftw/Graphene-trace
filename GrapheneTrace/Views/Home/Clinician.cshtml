@@ -28,7 +28,7 @@
                 <button class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">New Patients</button>
                 <button class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">Edit Patients</button>
                 <button class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">Request Admin</button>
-                <button class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">Previous Comments</button>
+                <button id="prevCommentsButton" class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">Previous Comments</button>
             </nav>
         </aside>
 
@@ -50,7 +50,32 @@
                 <h2 id="modalTitle" class="text-2xl font-semibold text-gray-800">Patient Heatmap</h2>
                 <button onclick="closeHeatmapModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
             </div>
+            
             <div id="heatmapContainer"></div>
+
+            <div class="mt-6 border-t pt-4">
+                <label for="commentTextArea" class="block text-sm font-medium text-gray-700">Add a Comment</label>
+                <textarea id="commentTextArea" rows="3" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                
+                <div class="flex justify-between items-center mt-2">
+                    <div id="commentStatus" class="text-sm"></div>
+                    <button id="saveCommentButton" class="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">
+                        Save Comment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="commentsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 max-w-4xl w-full mx-4" style="max-height: 80vh; display: flex; flex-direction: column;">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h2 class="text-2xl font-semibold text-gray-800">All Previous Comments</h2>
+                <button onclick="closeCommentsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <div id="commentsContainer" class="overflow-y-auto">
+                </div>
         </div>
     </div>
 </div>
@@ -72,6 +97,33 @@
             renderPatients(patientDataCache.filter(p => 
                 (p.patientId || '').toLowerCase().includes(query)
             ));
+        });
+
+        $('#saveCommentButton').on('click', function() {
+            const commentText = $('#commentTextArea').val();
+            const patientId = $('#heatmapModal').data('patientId');
+            const fileName = $('#heatmapModal').data('fileName');
+            const statusEl = $('#commentStatus');
+
+            if (!commentText) {
+                statusEl.text('Comment cannot be empty.').attr('class', 'text-sm text-red-600');
+                return;
+            }
+            statusEl.text('Saving...').attr('class', 'text-sm text-gray-600');
+
+            $.post('/Home/SaveComment', { patientId: patientId, fileName: fileName, comment: commentText })
+                .done(function() {
+                    statusEl.text('Comment saved!').attr('class', 'text-sm text-green-600');
+                    $('#commentTextArea').val('');
+                })
+                .fail(function() {
+                    statusEl.text('Failed to save comment.').attr('class', 'text-sm text-red-600');
+                });
+        });
+
+        // NEW: Previous Comments button logic
+        $('#prevCommentsButton').on('click', function() {
+            showCommentsModal();
         });
     });
 
@@ -108,29 +160,22 @@
     function renderPatients(patients) {
         const list = $('#patientList');
         list.empty();
-
         if (patients.length === 0) {
             list.append('<div class="text-center text-gray-500 p-8">No matching patients found.</div>');
             return;
         }
-
         patients.forEach(p => list.append(createPatientCard(p)));
     }
 
     function createPatientCard(patient) {
         const pid = patient.patientId || patient.storageId || '';
-        
         const card = $('<div>').addClass('bg-white rounded-lg shadow mb-2');
-
-        // Patient ID "button" (blue with shadow)
         const header = $('<div>')
             .addClass('cursor-pointer text-center py-3 px-4 font-medium text-black bg-#3fa4fc-600 hover:bg-#3fa4fc-700 rounded-lg shadow-md transition-all')
             .text(pid)
             .attr('role', 'button')
             .click(() => togglePatientDetails(pid));
-
         const details = $('<div>').attr('id', `details-${pid}`).addClass('mt-2 hidden p-4 border-t border-gray-200');
-
         card.append(header).append(details);
         return card;
     }
@@ -138,7 +183,6 @@
     function togglePatientDetails(patientId) {
         const detailsEl = $(`#details-${patientId}`);
         if (detailsEl.length === 0) return;
-
         const isAlreadyOpen = !detailsEl.hasClass('hidden');
         $('.patient-details-panel').not(detailsEl).addClass('hidden');
 
@@ -161,13 +205,11 @@
         const fname = file.fileName || file.FileName || '';
         const entry = $('<div>').addClass('border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition')
             .click(() => showHeatmap(patientStorageId, fname));
-
         const miniHeatmap = createMiniHeatmap(file.smallMatrix || file.SmallMatrix || []);
         const metrics = $('<div>').addClass('ml-4 flex-grow')
             .append($('<h4>').addClass('font-medium text-sm text-gray-900').text(fname))
             .append($('<p>').addClass('text-xs text-gray-600')
                 .text(`Peak: ${file.peakPressure || file.PeakPressure || 0} mmHg | Area: ${file.contactArea || file.ContactArea || 0}%`));
-
         const row = $('<div>').addClass('flex items-start').append(miniHeatmap).append(metrics);
         entry.append(row);
         return entry;
@@ -202,6 +244,8 @@
         $('#modalTitle').text(`Pressure Map: ${fileName}`);
         $('#heatmapContainer').html('<div class="text-center text-indigo-600 py-6">Loading...</div>');
         $('#heatmapModal').removeClass('hidden');
+        $('#heatmapModal').data('patientId', patientStorageId);
+        $('#heatmapModal').data('fileName', fileName);
 
         $.get(`/Home/GetHeatmapPartial?patientId=${patientStorageId}&fileName=${fileName}`)
             .done(data => $('#heatmapContainer').html(data))
@@ -211,6 +255,58 @@
     function closeHeatmapModal() {
         $('#heatmapModal').addClass('hidden');
         $('#heatmapContainer').empty();
+        $('#commentTextArea').val('');
+        $('#commentStatus').empty().attr('class', 'text-sm');
+        $('#heatmapModal').removeData('patientId').removeData('fileName');
     }
+
+    // --- NEW FUNCTIONS FOR COMMENTS MODAL ---
+
+    function showCommentsModal() {
+        const container = $('#commentsContainer');
+        container.html('<div class="text-center text-indigo-600 py-6">Loading all comments...</div>');
+        $('#commentsModal').removeClass('hidden');
+
+        $.get('/Home/GetAllComments')
+            .done(function(comments) {
+                renderComments(comments);
+            })
+            .fail(function() {
+                container.html('<p class="text-red-600 text-center">Error loading comments.</p>');
+            });
+    }
+
+    function closeCommentsModal() {
+        $('#commentsModal').addClass('hidden');
+        $('#commentsContainer').empty();
+    }
+
+    function renderComments(comments) {
+        const container = $('#commentsContainer');
+        container.empty();
+
+        if (!comments || comments.length === 0) {
+            container.html('<div class="text-center text-gray-500 p-8">No comments found.</div>');
+            return;
+        }
+
+        // comments are already sorted by the server (newest first)
+        comments.forEach(comment => {
+            const date = new Date(comment.timestamp).toLocaleString();
+
+            const entry = $('<div>').addClass('border-b border-gray-200 p-4');
+            
+            const header = $('<div>').addClass('flex justify-between items-center text-sm mb-2');
+            header.append($('<strong>').addClass('text-indigo-700').text(`Patient: ${comment.patientId}`));
+            header.append($('<span>').addClass('text-gray-500').text(date));
+
+            const file = $('<div>').addClass('text-sm text-gray-600 mb-2').text(`File: ${comment.fileName}`);
+            const text = $('<p>').addClass('text-gray-800').text(comment.comment);
+
+            entry.append(header).append(file).append(text);
+            container.append(entry);
+        });
+    }
+
 </script>
 }

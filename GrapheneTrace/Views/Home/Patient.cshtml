@@ -1,12 +1,103 @@
+@model GrapheneTrace.ViewModels.PatientHomeViewModel
+
 @{
-    ViewData["Title"] = "Patient Portal";
+    ViewData["Title"] = "Patient Home Dashboard";
 }
 
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Patient Portal</h1>
-    
-    <div class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-xl font-semibold mb-4">Patient Dashboard</h3>
-        <p class="text-gray-600">Welcome to your patient dashboard.</p>
+<div class="patient-home-container">
+
+    <header class="top-bar">
+        <button class="menu-toggle-btn" onclick="toggleMenu('left-menu')">☰</button>
+
+        <form asp-controller="Home" asp-action="Search" method="post" class="search-bar-form">
+            <input type="text" name="searchQuery" placeholder="Search for information, doctors, or alerts..." class="search-input" />
+            <button type="submit" class="search-btn">🔍</button>
+        </form>
+
+        <div class="top-bar-actions">
+            <a href="/Settings" class="icon-btn">⚙️ Settings</a>
+            <a asp-action="SignOut" class="icon-btn">🚪 Sign Out</a>
+            <button class="profile-toggle-btn" onclick="toggleMenu('right-profile')">
+                <div class="user-icon-placeholder">👤</div>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <div class="metric-card">
+            <div class="simple-graph-placeholder">*Simple graph or heatmap of pressure*</div>
+            <div class="glanceable-info">
+                <h3>@Model.PressureData.Title</h3>
+                <p>@Model.PressureData.GlanceableInfo</p>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="simple-graph-placeholder">*Simple graph of Heart rate if device is connected*</div>
+            <div class="glanceable-info">
+                <h3>@Model.HeartRateData.Title</h3>
+                <p>@Model.HeartRateData.GlanceableInfo</p>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="simple-graph-placeholder">*Simple graph for miscellaneous data*</div>
+            <div class="glanceable-info">
+                <h3>@Model.MiscData1.Title</h3>
+                <p>@Model.MiscData1.GlanceableInfo</p>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="simple-graph-placeholder">*Simple graph for extra miscellaneous data*</div>
+            <div class="glanceable-info">
+                <h3>@Model.MiscData2.Title</h3>
+                <p>@Model.MiscData2.GlanceableInfo</p>
+            </div>
+        </div>
     </div>
+    
+    <div id="left-menu" class="pop-up-menu left-menu-pop-up">
+        <div class="pop-up-header">
+            <h2>@Model.PatientName</h2>
+            <button onclick="toggleMenu('left-menu')" class="close-btn">X</button>
+        </div>
+        <ul class="menu-top-list">
+            <li><a href="#">View Heat Map</a></li>
+            <li><a href="#">View Clinician Feedback</a></li>
+            <li><a href="#">View Alerts @(Model.HasNewAlerts ? "🔴" : "")</a></li>
+            <li><a href="#">View Medications</a></li>
+        </ul>
+        <div class="menu-footer">
+            <h4>Doctors Visited:</h4>
+            <ul>
+                @foreach (var doctor in Model.VisitedDoctors)
+                {
+                    <li>@doctor.Name</li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div id="right-profile" class="pop-up-menu right-profile-pop-up">
+        <div class="pop-up-header">
+            <h2>Patient Profile</h2>
+            <button onclick="toggleMenu('right-profile')" class="close-btn">X</button>
+        </div>
+        <div class="profile-details">
+            <p><strong>User ID:</strong> @Model.UserId</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+            <p><strong>Medical History:</strong> @Model.MedicalHistorySummary</p>
+        </div>
+        <a href="/Account/Manage" class="manage-account-btn">Manage Account</a>
+    </div>
+
 </div>
+
+<script>
+    function toggleMenu(menuId) {
+        const menu = document.getElementById(menuId);
+        menu.classList.toggle('open');
+    }
+</script>
