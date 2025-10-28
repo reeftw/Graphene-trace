@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using GrapheneTrace.Models;
+using GrapheneTrace.ViewModels;
 using System.Text;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Hosting; 
-using System; 
+using Microsoft.AspNetCore.Hosting;
+using System;
+using Microsoft.Extensions.Logging;
 
 namespace GrapheneTrace.Controllers
 {
@@ -13,15 +15,17 @@ namespace GrapheneTrace.Controllers
     public class HomeController : Controller
     {
         private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly ILogger<HomeController> _logger;
         // CRITICAL FIX: Looks for the GTLB-Data folder inside the wwwroot folder
         private const string DATA_FOLDER_NAME = "wwwroot/GTLBData";
         private const int MATRIX_SIZE = 32;
         private const int ALERT_THRESHOLD = 200;
         private const int MIN_CONTACT_PRESSURE = 10;
 
-        public HomeController(IWebHostEnvironment hostingEnvironment)
+        public HomeController(IWebHostEnvironment hostingEnvironment, ILogger<HomeController> logger)
         {
             _hostingEnvironment = hostingEnvironment;
+            _logger = logger;
         }
 
         public IActionResult Index()
@@ -36,7 +40,8 @@ namespace GrapheneTrace.Controllers
 
         public IActionResult Patient()
         {
-            return View();
+            var model = new PatientHomeViewModel();
+            return View(model);
         }
 
         public IActionResult Admin()
@@ -55,7 +60,7 @@ namespace GrapheneTrace.Controllers
             if (!Directory.Exists(dataRootPath))
             {
                 // Graceful failure: return empty JSON list if folder is missing
-                Console.WriteLine($"ERROR: GTLB-Data folder not found at: {dataRootPath}");
+                _logger.LogWarning("GTLB-Data folder not found at: {DataRootPath}", dataRootPath);
                 return Json(patientGroups);
             }
 
@@ -87,7 +92,7 @@ namespace GrapheneTrace.Controllers
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Error processing file {filePath}: {ex.Message}");
+                            _logger.LogError(ex, "Error processing file {FilePath}", filePath);
                         }
                     }
                     if (group.Files.Any()) patientGroups.Add(group);
@@ -113,7 +118,7 @@ namespace GrapheneTrace.Controllers
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Error processing file {filePath}: {ex.Message}");
+                            _logger.LogError(ex, "Error processing file {FilePath}", filePath);
                             // Skip problematic file
                         }
                     }
@@ -133,8 +138,20 @@ namespace GrapheneTrace.Controllers
         [HttpGet]
         public IActionResult GetHeatmapPartial(string patientId, string fileName)
         {
-            // Construct the path: ContentRoot/wwwroot/GTLB-Data/PatientId/FileName.csv
-            string fullPath = Path.Combine(_hostingEnvironment.ContentRootPath, DATA_FOLDER_NAME, patientId, fileName);
+            // Construct the path: prefer ContentRoot/wwwroot/GTLBData/PatientId/FileName.csv
+            // but fall back to ContentRoot/wwwroot/GTLBData/FileName.csv if patient folders are not used
+            string baseDataPath = Path.Combine(_hostingEnvironment.ContentRootPath, DATA_FOLDER_NAME);
+            string patientFolderPath = Path.Combine(baseDataPath, patientId ?? string.Empty);
+            string fullPath;
+            if (!string.IsNullOrEmpty(patientId) && Directory.Exists(patientFolderPath))
+            {
+                fullPath = Path.Combine(patientFolderPath, fileName);
+            }
+            else
+            {
+                // fallback: files might be directly under GTLBData with names like <patient>_date.csv
+                fullPath = Path.Combine(baseDataPath, fileName);
+            }
 
             try
             {
@@ -158,12 +175,13 @@ namespace GrapheneTrace.Controllers
             }
             catch (FileNotFoundException)
             {
+                _logger.LogWarning("Requested file not found: {FullPath}", fullPath);
                 return NotFound($"File not found: {fullPath}. Check file placement in GTLB-Data/{patientId}/");
             }
             catch (Exception ex)
             {
                 // General error catching for parsing or reading issues
-                Console.WriteLine($"Error processing data: {ex.ToString()}");
+                _logger.LogError(ex, "Error processing data for file {FullPath}", fullPath);
                 return StatusCode(500, $"Error processing data: {ex.Message}");
             }
         }
@@ -203,8 +221,6 @@ namespace GrapheneTrace.Controllers
         // Reads the CSV file and calculates metrics for the summary list view
         private PatientFile ReadAndSummarizeCsv(string path, string patientId, string fileName)
         {
-            // CS0168 Fix: Exception variable is now used in Console.WriteLine or logging. (Not applicable to this method, but shown in others)
-
             var lines = System.IO.File.ReadLines(path).Take(MATRIX_SIZE).ToList();
 
             int maxPressure = 0;
@@ -274,6 +290,21 @@ namespace GrapheneTrace.Controllers
             float contactAreaPercentFloat = (float)Math.Round((double)contactCount / TOTAL_PIXELS * 100.0);
             model.ContactAreaPercent = (int)contactAreaPercentFloat; // CS0266 FIX: Explicit cast to int
             model.IsAlertGenerated = maxPressure >= ALERT_THRESHOLD;
+        }
+
+        // Small utility actions
+        public IActionResult Search(string searchQuery)
+        {
+            // In a real app: log, redirect to a search results page, or update the current view
+            // For now, just redirects back to the patient homepage
+            return RedirectToAction("Patient");
+        }
+
+        public new IActionResult SignOut()
+        {
+            // In a real app: clear session, cookies, etc.
+            // For now, just redirects back to the homepage
+            return RedirectToAction("Index", "Home"); // Example sign-out destination
         }
 
         [HttpGet]

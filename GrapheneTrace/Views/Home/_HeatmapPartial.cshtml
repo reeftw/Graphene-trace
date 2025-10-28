@@ -19,7 +19,7 @@
     <div class="p-2">
         <h3 class="text-lg font-semibold mb-2">Metrics</h3>
         <p>Peak Pressure: <strong>@Model.PeakPressureIndex</strong></p>
-        <p>Contact Area: <strong>@Model.ContactAreaPercent%</strong></p>
+    <p>Contact Area: <strong>@(Model.ContactAreaPercent + "%")</strong></p>
         <p>Alert: <strong>@(Model.IsAlertGenerated ? "Yes" : "No")</strong></p>
     </div>
 </div>
