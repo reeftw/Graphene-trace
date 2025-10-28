@@ -1,31 +1,141 @@
-html {
-  font-size: 14px;
+/* --- Global Styles --- */
+.patient-home-container {
+    padding-top: 60px; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f9;
+    min-height: 100vh;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+/* --- Top Bar --- */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 100;
+}
+.search-bar-form {
+    flex-grow: 1;
+    max-width: 600px;
+    margin: 0 30px;
+    display: flex;
+}
+.search-input {
+    width: 100%;
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+}
+.search-btn { display: none; }
+.top-bar-actions a {
+    text-decoration: none;
+    color: #333;
+    margin-left: 15px;
+}
+.user-icon-placeholder {
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: 10px;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+/* --- Dashboard Grid & Metric Cards (Based on your image model) --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.metric-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    display: flex;
+    min-height: 250px;
+    overflow: hidden;
+}
+.simple-graph-placeholder {
+    width: 45%;
+    background-color: #e6e6e6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    text-align: center;
+    color: #555;
+    padding: 15px;
+}
+.glanceable-info {
+    width: 55%;
+    padding: 20px;
+}
+.glanceable-info h3 {
+    color: #007bff;
+    margin-top: 0;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* --- Pop-up Menu Base Styling --- */
+.pop-up-menu {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 320px; 
+    background-color: #fff;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    z-index: 200;
+    padding: 20px;
+    transition: transform 0.4s ease-in-out;
+    display: flex;
+    flex-direction: column;
 }
 
-body {
-  margin-bottom: 60px;
+/* --- LEFT MENU --- */
+.left-menu-pop-up {
+    left: 0;
+    transform: translateX(-100%); /* Hidden by default */
 }
+.left-menu-pop-up.open {
+    transform: translateX(0); /* Slides in */
+}
+.menu-top-list { list-style: none; padding: 0; }
+.menu-top-list li a {
+    display: block;
+    padding: 12px 0;
+    text-decoration: none;
+    color: #444;
+    border-bottom: 1px solid #f0f0f0;
+}
+.menu-footer {
+    margin-top: auto; /* Pushes the doctor list to the bottom */
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+.menu-footer ul { list-style: none; padding: 0; font-size: 0.9em; }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* --- RIGHT PROFILE --- */
+.right-profile-pop-up {
+    right: 0;
+    transform: translateX(100%); /* Hidden by default */
 }
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.right-profile-pop-up.open {
+    transform: translateX(0); /* Slides in */
 }
+.manage-account-btn {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    background-color: #28a745; /* Green for action */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: auto; /* Pushes button to bottom */
+}
+.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #777; }

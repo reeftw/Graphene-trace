@@ -8,19 +8,19 @@
     "net9.0": []
   },
   "packageFolders": {
-    "/Users/vivekvarijakshan/.nuget/packages/": {}
+    "/Users/anakharajthampitharajayaraj/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
+      "projectUniqueName": "/Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
       "projectName": "GrapheneTrace",
-      "projectPath": "/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
-      "packagesPath": "/Users/vivekvarijakshan/.nuget/packages/",
-      "outputPath": "/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/",
+      "projectPath": "/Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
+      "packagesPath": "/Users/anakharajthampitharajayaraj/.nuget/packages/",
+      "outputPath": "/Users/anakharajthampitharajayaraj/Documents/projects/Graphene-trace/GrapheneTrace/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/vivekvarijakshan/.nuget/NuGet/NuGet.Config"
+        "/Users/anakharajthampitharajayaraj/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -68,7 +68,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.306/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
