@@ -1,488 +1,507 @@
-@{
-    ViewData["Title"] = "Admin Dashboard";
-}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"]</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        height: 100vh;
-        background-color: #f4f6f9;
+    @{
+        ViewData["Title"] = "Admin Dashboard";
     }
-        #sidebar {
-            width: 300px;
-            max-width: 300px;
-            height: 200vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #f2f2f7;
-            color: black;
-            overflow-y: auto;
-        }
-        .nav-link {
-            color: black;
-        }
 
-        .nav-link.active {
-            background-color: #1e6ef4;
-                    color: white;
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>@ViewData["Title"]</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f6f9;
         }
-        #main {
-            margin-left: 200px;
+            #sidebar {
+                width: 300px;
+                max-width: 300px;
+                height: 200vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+                background-color: #f2f2f7;
+                color: black;
+                overflow-y: auto;
+            }
+
+            .nav-link {
+                color: black;
+            }
+
+            .nav-link.active {
+                background-color: #1e6ef4;
+                        color: white;
+            }
+           #main {
+            margin-left: 300px; /* same as sidebar width */
             flex-grow: 1;
             padding: 20px;
             overflow-y: auto;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .add-btns {
-            margin-top: auto;
-        }
-
-        .btn-clinician {
-            background-color: #1e6ef4;
-            color: white;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .btn-patient {
-            background-color: #34c759;
-            color: white;
-            width: 100%;
-        }
-
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* dims everything behind */
+            min-width: 0;
+            width: auto;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 9999; /* very high to cover all content including sidebar */
-        }
-
-
-
-            .popup.active {
-                opacity: 1;
-                visibility: visible;
+            flex-direction: column; /* stack search bar and results vertically */
+            gap: 10px; /* space between search bar and list */
             }
 
-        .popup-content {
-            background-color: white;
-            padding: 25px;
-            border-radius: 12px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transform: scale(0.8);
-            transition: transform 0.2s ease;
-        }
 
-        .popup.active .popup-content {
-            transform: scale(1);
-        }
+            .btn {
+                border: none;
+                border-radius: 8px;
+                padding: 10px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+            }
 
+            .add-btns {
+                margin-top: auto;
+            }
 
-        .popup input {
-            width: 90%;
-            padding: 8px;
-            margin: 8px 0;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
+            .btn-clinician {
+                background-color: #1e6ef4;
+                color: white;
+                width: 100%;
+                margin-bottom: 10px;
+            }
 
-        .popup button {
-            margin-top: 10px;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+            .btn-patient {
+                background-color: #34c759;
+                color: white;
+                width: 100%;
+            }
 
-        .popup-overlay {
-            display: none; /* hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5); /* grey overlay */
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-        }
-
-        .popup-content {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            min-width: 300px;
-        }
-
-
-        .save-btn {
-            background-color: #1e6ef4;
-            color: white;
-        }
-
-        .cancel-btn {
-            background-color: #ccc;
-            margin-left: 10px;
-        }
-
-.title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* space between label and dropdown */
-  margin-bottom: 10px;
-  margin-top: 10px;
-}
-
-.title-row label {
-  font-weight: bold;
-  min-width: 50px;
+            .d-flex.h-100 {
+    display: flex;
+    height: 100vh;
+    width: 100vw;  /* ensure full width */
+    overflow-x: hidden; /* hide any invisible scrollbars */
 }
 
 
-    </style>
-</head>
-<body>
-    <div class="d-flex h-100">
-        <!-- Sidebar -->
-        <div id="sidebar" class="d-flex flex-column p-3" style="height: 100vh; justify-content: space-between;">
-            <!-- Top Section -->
-            <div>
-                <h3 class="text-center mb-4">Admin Menu</h3>
-                <ul class="nav nav-pills flex-column mb-auto">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link active" id="clinicians-btn">
-                            Clinicians
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="nav-link" id="patients-btn">
-                            Patients
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            .popup {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5); /* dims everything behind */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+                z-index: 9999; /* very high to cover all content including sidebar */
+            }
 
-            <!-- Bottom Buttons -->
-            <div class="mt-3">
-                <button class="btn w-100 mb-2" 
-                style="background-color: #1e6ef4; color: white;"
-                        onclick="openClinicianPopup('clinician')">
-                Add New Clinician
-            </button>
-                <button class="btn w-100" 
-                style="background-color: #34c759; color: white;"
-                        onclick="openPatientPopup('patient')">
-                Add New Patient
+
+
+                .popup.active {
+                    opacity: 1;
+                    visibility: visible;
+                }
+
+            .popup-content {
+                background-color: white;
+                padding: 25px;
+                border-radius: 12px;
+                width: 400px;
+                text-align: center;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                transform: scale(0.8);
+                transition: transform 0.2s ease;
+            }
+
+            .popup.active .popup-content {
+                transform: scale(1);
+            }
+
+
+            .popup input {
+                width: 90%;
+                padding: 8px;
+                margin: 8px 0;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+            }
+
+            .popup button {
+                margin-top: 10px;
+                padding: 8px 20px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+            .popup-overlay {
+                display: none; /* hidden by default */
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5); /* grey overlay */
+                justify-content: center;
+                align-items: center;
+                z-index: 999;
+            }
+
+            .popup-content {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                min-width: 300px;
+            }
+
+
+            .save-btn {
+                background-color: #1e6ef4;
+                color: white;
+            }
+
+            .cancel-btn {
+                background-color: #ccc;
+                margin-left: 10px;
+            }
+
+    .title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* space between label and dropdown */
+    margin-bottom: 10px;
+    margin-top: 10px;
+    }
+
+    .title-row label {
+    font-weight: bold;
+    min-width: 50px;
+    }
+
+
+        </style>
+    </head>
+    <body>
+        <div class="d-flex h-100">
+            <!-- Sidebar -->
+            <div id="sidebar" class="d-flex flex-column p-3" style="height: 100vh; justify-content: space-between;">
+                <!-- Top Section -->
+                <div>
+                    <h3 class="text-center mb-4">Admin Menu</h3>
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" id="clinicians-btn">
+                                Clinicians
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" id="patients-btn">
+                                Patients
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Bottom Buttons -->
+                <div class="mt-3">
+                    <button class="btn w-100 mb-2" 
+                    style="background-color: #1e6ef4; color: white;"
+                            onclick="openClinicianPopup('clinician')">
+                    Add New Clinician
                 </button>
+                    <button class="btn w-100" 
+                    style="background-color: #34c759; color: white;"
+                            onclick="openPatientPopup('patient')">
+                    Add New Patient
+                    </button>
+                </div>
             </div>
+
+    <!-- Add Clinician Popup -->
+    <div id="clinician-popup" class="popup">
+    <div class="popup-content">
+        <h3>Add New Clinician</h3>
+
+        <!-- Title label + dropdown on the same line -->
+        <div class="title-row">
+        <label for="clinician-title">Title:</label>
+        <select id="clinician-title">
+            <option value="">Select</option>
+            <option value="Mr">Mr</option>
+            <option value="Ms">Ms</option>
+            <option value="Mrs">Mrs</option>
+            <option value="Dr">Dr</option>
+            <option value="Prof">Prof</option>
+        </select>
         </div>
 
-<!-- Add Clinician Popup -->
-<div id="clinician-popup" class="popup">
-  <div class="popup-content">
-    <h3>Add New Clinician</h3>
+        <!-- Rest of the input fields -->
+        <input type="text" id="clinician-first-name" placeholder="First Name" />
+        <input type="text" id="clinician-middle-name" placeholder="Middle Name" />
+        <input type="text" id="clinician-last-name" placeholder="Last Name" />
+        <input type="text" id="clinician-id-number" placeholder="ID Number (10 digits)" />
 
-    <!-- Title label + dropdown on the same line -->
-    <div class="title-row">
-      <label for="clinician-title">Title:</label>
-      <select id="clinician-title">
-        <option value="">Select</option>
-        <option value="Mr">Mr</option>
-        <option value="Ms">Ms</option>
-        <option value="Mrs">Mrs</option>
-        <option value="Dr">Dr</option>
-        <option value="Prof">Prof</option>
-      </select>
+        <button class="save-btn" onclick="saveClinician()">Save</button>
+        <button class="cancel-btn" onclick="closeClinicianPopup()">Cancel</button>
+    </div>
     </div>
 
-    <!-- Rest of the input fields -->
-    <input type="text" id="clinician-first-name" placeholder="First Name" />
-    <input type="text" id="clinician-middle-name" placeholder="Middle Name" />
-    <input type="text" id="clinician-last-name" placeholder="Last Name" />
-    <input type="text" id="clinician-id-number" placeholder="ID Number (10 digits)" />
+    <div id="patient-popup" class="popup">
+    <div class="popup-content">
+        <h3>Add New Patient</h3>
 
-    <button class="save-btn" onclick="saveClinician()">Save</button>
-    <button class="cancel-btn" onclick="closeClinicianPopup()">Cancel</button>
-  </div>
-</div>
+        <!-- Title label + dropdown on the same line -->
+        <div class="title-row">
+        <label for="patient-title">Title:</label>
+        <select id="patient-title">
+            <option value="">Select</option>
+            <option value="Mr">Mr</option>
+            <option value="Ms">Ms</option>
+            <option value="Mrs">Mrs</option>
+            <option value="Dr">Dr</option>
+            <option value="Prof">Prof</option>
+        </select>
+        </div>
 
-<div id="patient-popup" class="popup">
-  <div class="popup-content">
-    <h3>Add New Patient</h3>
+        <!-- Rest of the input fields -->
+        <input type="text" id="patient-first-name" placeholder="First Name" />
+        <input type="text" id="patient-middle-name" placeholder="Middle Name" />
+        <input type="text" id="patient-last-name" placeholder="Last Name" />
+        <input type="text" id="patient-id-number" placeholder="ID Number (10 digits)" />
 
-    <!-- Title label + dropdown on the same line -->
-    <div class="title-row">
-      <label for="patient-title">Title:</label>
-      <select id="patient-title">
-        <option value="">Select</option>
-        <option value="Mr">Mr</option>
-        <option value="Ms">Ms</option>
-        <option value="Mrs">Mrs</option>
-        <option value="Dr">Dr</option>
-        <option value="Prof">Prof</option>
-      </select>
+        <button class="save-btn" onclick="savePatient()">Save</button>
+        <button class="cancel-btn" onclick="closePatientPopup()">Cancel</button>
+    </div>
     </div>
 
-    <!-- Rest of the input fields -->
-    <input type="text" id="patient-first-name" placeholder="First Name" />
-    <input type="text" id="patient-middle-name" placeholder="Middle Name" />
-    <input type="text" id="patient-last-name" placeholder="Last Name" />
-    <input type="text" id="patient-id-number" placeholder="ID Number (10 digits)" />
-
-    <button class="save-btn" onclick="savePatient()">Save</button>
-    <button class="cancel-btn" onclick="closePatientPopup()">Cancel</button>
-  </div>
-</div>
 
 
 
+    <!-- Popup JS -->
+    <script>
+    // Clinician popup
+    function openClinicianPopup() {
+        document.getElementById('clinician-popup').classList.add('active');
+    }
+    function closeClinicianPopup() {
+        document.getElementById('clinician-popup').classList.remove('active');
+    }
 
-<!-- Popup JS -->
-<script>
-// Clinician popup
-function openClinicianPopup() {
-    document.getElementById('clinician-popup').classList.add('active');
-}
-function closeClinicianPopup() {
-    document.getElementById('clinician-popup').classList.remove('active');
-}
-
-// Patient popup
-function openPatientPopup() {
-    document.getElementById('patient-popup').classList.add('active');
-}
-function closePatientPopup() {
-    document.getElementById('patient-popup').classList.remove('active');
-}
-
-
-</script>
+    // Patient popup
+    function openPatientPopup() {
+        document.getElementById('patient-popup').classList.add('active');
+    }
+    function closePatientPopup() {
+        document.getElementById('patient-popup').classList.remove('active');
+    }
 
 
-<script>
-function saveClinician() {
-    const title = document.getElementById('clinician-title').value;
-    const firstName = document.getElementById('clinician-first-name').value.trim();
-    const middleName = document.getElementById('clinician-middle-name').value.trim();
-    const lastName = document.getElementById('clinician-last-name').value.trim();
-    const idNumber = document.getElementById('clinician-id-number').value.trim();
+    </script>
 
-    // ✅ Validation
-    if (!firstName || !lastName) return alert("First name and last name are required.");
-    if (!/^\d{10}$/.test(idNumber)) return alert("ID Number must be exactly 10 digits.");
 
-    // ✅ Prepare data
-    const clinicianData = { title, firstName, middleName, lastName, idNumber };
+    <script>
+    function saveClinician() {
+        const title = document.getElementById('clinician-title').value;
+        const firstName = document.getElementById('clinician-first-name').value.trim();
+        const middleName = document.getElementById('clinician-middle-name').value.trim();
+        const lastName = document.getElementById('clinician-last-name').value.trim();
+        const idNumber = document.getElementById('clinician-id-number').value.trim();
 
-    // ✅ POST to backend
-    fetch('/Home/AddClinician', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(clinicianData)
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert(`Clinician added successfully!\nGTID: ${data.gtid}`);
-            closeClinicianPopup();
-        } else {
-            alert(`Error: ${data.message}`);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Error adding clinician.");
-    });
-}
-</script>
+        // ✅ Validation
+        if (!title) return alert("Please select a title.");
+        if (!firstName || !lastName) return alert("First name and last name are required.");
+        if (!/^\d{10}$/.test(idNumber)) return alert("ID Number must be exactly 10 digits.");
 
-        <div id="popup" class="popup-overlay">
-            <div class="popup-content">
-                <h2 id="popup-title"></h2>
-                <input type="text" id="popup-input" placeholder="Enter name..." />
-                <div class="popup-buttons">
-                    <button id="popup-save-btn">Save</button>
-                    <button onclick="closePopup()">Cancel</button>
+        // ✅ Prepare data
+        const clinicianData = { title, firstName, middleName, lastName, idNumber };
+
+        // ✅ POST to backend
+        fetch('/Home/AddClinician', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(clinicianData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Clinician added successfully!\nGTID: ${data.gtid}`);
+                closeClinicianPopup();
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error adding clinician.");
+        });
+    }
+    </script>
+
+            <div id="popup" class="popup-overlay">
+                <div class="popup-content">
+                    <h2 id="popup-title"></h2>
+                    <input type="text" id="popup-input" placeholder="Enter name..." />
+                    <div class="popup-buttons">
+                        <button id="popup-save-btn">Save</button>
+                        <button onclick="closePopup()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Main Content -->
+            <div id="main">
+                <h2 id="section-title">Clinicians</h2>
+                <div class="mb-3">
+                    <input type="text" id="search-bar" class="form-control" placeholder="Search clinicians...">
+                </div>
+                <div id="search-results">
+                    <!-- Results will appear here -->
+                    <ul class="list-group">
+                        <li class="list-group-item">John Doe - Cardiologist</li>
+                        <li class="list-group-item">Jane Smith - Neurologist</li>
+                        <li class="list-group-item">Robert Brown - Surgeon</li>
+                    </ul>
                 </div>
             </div>
         </div>
 
+        <script>
+            let currentType = "";
 
-        <!-- Main Content -->
-        <div id="main">
-            <h2 id="section-title">Clinicians</h2>
-            <div class="mb-3">
-                <input type="text" id="search-bar" class="form-control" placeholder="Search clinicians...">
-            </div>
-            <div id="search-results">
-                <!-- Results will appear here -->
-                <ul class="list-group">
-                    <li class="list-group-item">John Doe - Cardiologist</li>
-                    <li class="list-group-item">Jane Smith - Neurologist</li>
-                    <li class="list-group-item">Robert Brown - Surgeon</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+            function openPopup(type) {
+                currentType = type;
+                const popup = document.getElementById('popup');
+                const title = document.getElementById('popup-title');
+                const extraField = document.getElementById('extra');
 
-    <script>
-        let currentType = "";
+                if (type === 'clinician') {
+                    title.textContent = "Add New Clinician";
+                    extraField.placeholder = "Enter Department";
+                } else {
+                    title.textContent = "Add New Patient";
+                    extraField.placeholder = "Enter Condition";
+                }
 
-        function openPopup(type) {
-            currentType = type;
-            const popup = document.getElementById('popup');
-            const title = document.getElementById('popup-title');
-            const extraField = document.getElementById('extra');
-
-            if (type === 'clinician') {
-                title.textContent = "Add New Clinician";
-                extraField.placeholder = "Enter Department";
-            } else {
-                title.textContent = "Add New Patient";
-                extraField.placeholder = "Enter Condition";
+                popup.classList.add('active');
             }
 
-            popup.classList.add('active');
-        }
+            function closePopup() {
+                document.getElementById('popup').classList.remove('active');
+            }
 
-        function closePopup() {
-            document.getElementById('popup').classList.remove('active');
-        }
+            function saveData() {
+                const name = document.getElementById('name').value;
+                const extra = document.getElementById('extra').value;
 
-        function saveData() {
-            const name = document.getElementById('name').value;
-            const extra = document.getElementById('extra').value;
+                alert(`✅ ${currentType === 'clinician' ? "Clinician" : "Patient"} Added!\nName: ${name}\nExtra: ${extra}`);
 
-            alert(`✅ ${currentType === 'clinician' ? "Clinician" : "Patient"} Added!\nName: ${name}\nExtra: ${extra}`);
+                closePopup();
+            }
+        </script>
 
-            closePopup();
-        }
-    </script>
+        <script>
+                    $('#add-clinician-btn').click(function(){
+                const name = $('#clinician-name-input').val();
+                if(!name) return alert("Enter name");
+                $.post('/Admin/AddClinician', { name }, function(res){
+                    alert(`Clinician added: ${res.id} - ${res.name}`);
+                    closePopup();
+                });
+            });
 
+            $('#add-patient-btn').click(function(){
+                const name = $('#patient-name-input').val();
+                if(!name) return alert("Enter name");
+                $.post('/Admin/AddPatient', { name }, function(res){
+                    alert(`Patient added: ${res.id} - ${res.name}`);
+                    closePopup();
+                });
+            });
+        </script>
+
+        
     <script>
-                $('#add-clinician-btn').click(function(){
-            const name = $('#clinician-name-input').val();
-            if(!name) return alert("Enter name");
-            $.post('/Admin/AddClinician', { name }, function(res){
-                alert(`Clinician added: ${res.id} - ${res.name}`);
-                closePopup();
-            });
-        });
+        const clinicians = [
+            "John Doe - Cardiologist",
+            "Jane Smith - Neurologist",
+            "Robert Brown - Surgeon"
+        ];
 
-        $('#add-patient-btn').click(function(){
-            const name = $('#patient-name-input').val();
-            if(!name) return alert("Enter name");
-            $.post('/Admin/AddPatient', { name }, function(res){
-                alert(`Patient added: ${res.id} - ${res.name}`);
-                closePopup();
-            });
-        });
+        let patients = []; // will be filled dynamically
+
+        async function loadPatients() {
+            try {
+                const response = await fetch('/Home/GetPatientFiles');
+                if (!response.ok) throw new Error("Failed to fetch patients");
+                patients = await response.json();
+
+                // Convert patient IDs into readable list items
+                patients = patients.map(p => `${p}`);
+
+                // Update UI immediately
+                if (document.getElementById('patients-btn').classList.contains('active')) {
+                    updateSearchResults(patients);
+                }
+            } catch (err) {
+                console.error('Error loading patients:', err);
+            }
+        }
+
+        // Call the function when the page loads
+        window.addEventListener('DOMContentLoaded', loadPatients);
     </script>
 
-    
-<script>
-    const clinicians = [
-        "John Doe - Cardiologist",
-        "Jane Smith - Neurologist",
-        "Robert Brown - Surgeon"
-    ];
+        <script>
+            const cliniciansBtn = document.getElementById('clinicians-btn');
+            const patientsBtn = document.getElementById('patients-btn');
+            const sectionTitle = document.getElementById('section-title');
+            const searchBar = document.getElementById('search-bar');
+            const searchResults = document.getElementById('search-results');
 
-    let patients = []; // will be filled dynamically
 
-    async function loadPatients() {
-        try {
-            const response = await fetch('/Home/GetPatientFiles');
-            if (!response.ok) throw new Error("Failed to fetch patients");
-            patients = await response.json();
+            function updateSearchResults(list) {
+                let html = '<ul class="list-group">';
+                list.forEach(item => {
+                    html += `<li class="list-group-item">${item}</li>`;
+                });
+                html += '</ul>';
+                searchResults.innerHTML = html;
+            }
 
-            // Convert patient IDs into readable list items
-            patients = patients.map(p => `${p}`);
+            cliniciansBtn.addEventListener('click', () => {
+                cliniciansBtn.classList.add('active');
+                patientsBtn.classList.remove('active');
+                sectionTitle.textContent = "Clinicians";
+                searchBar.placeholder = "Search clinicians...";
+                updateSearchResults(clinicians);
+            });
 
-            // Update UI immediately
-            if (document.getElementById('patients-btn').classList.contains('active')) {
+            patientsBtn.addEventListener('click', () => {
+                patientsBtn.classList.add('active');
+                cliniciansBtn.classList.remove('active');
+                sectionTitle.textContent = "Patients";
+                searchBar.placeholder = "Search patients...";
                 updateSearchResults(patients);
-            }
-        } catch (err) {
-            console.error('Error loading patients:', err);
-        }
-    }
-
-    // Call the function when the page loads
-    window.addEventListener('DOMContentLoaded', loadPatients);
-</script>
-
-    <script>
-        const cliniciansBtn = document.getElementById('clinicians-btn');
-        const patientsBtn = document.getElementById('patients-btn');
-        const sectionTitle = document.getElementById('section-title');
-        const searchBar = document.getElementById('search-bar');
-        const searchResults = document.getElementById('search-results');
-
-
-        function updateSearchResults(list) {
-            let html = '<ul class="list-group">';
-            list.forEach(item => {
-                html += `<li class="list-group-item">${item}</li>`;
             });
-            html += '</ul>';
-            searchResults.innerHTML = html;
-        }
 
-        cliniciansBtn.addEventListener('click', () => {
-            cliniciansBtn.classList.add('active');
-            patientsBtn.classList.remove('active');
-            sectionTitle.textContent = "Clinicians";
-            searchBar.placeholder = "Search clinicians...";
+            searchBar.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const activeList = cliniciansBtn.classList.contains('active') ? clinicians : patients;
+                const filtered = activeList.filter(item => item.toLowerCase().includes(query));
+                updateSearchResults(filtered);
+            });
+
+            // Initial load
             updateSearchResults(clinicians);
-        });
-
-        patientsBtn.addEventListener('click', () => {
-            patientsBtn.classList.add('active');
-            cliniciansBtn.classList.remove('active');
-            sectionTitle.textContent = "Patients";
-            searchBar.placeholder = "Search patients...";
-            updateSearchResults(patients);
-        });
-
-        searchBar.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const activeList = cliniciansBtn.classList.contains('active') ? clinicians : patients;
-            const filtered = activeList.filter(item => item.toLowerCase().includes(query));
-            updateSearchResults(filtered);
-        });
-
-        // Initial load
-        updateSearchResults(clinicians);
-    </script>
-</body>
-</html>
+        </script>
+    </body>
+    </html>
