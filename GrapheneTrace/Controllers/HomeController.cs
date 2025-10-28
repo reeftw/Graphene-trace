@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using GrapheneTrace.Models;
-using GrapheneTrace.ViewModels; // Added this for PatientCommentViewModel
+using GrapheneTrace.ViewModels;
+using System.Text;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
@@ -409,5 +410,58 @@ namespace GrapheneTrace.Controllers
 
             return Json(patients);
         }
+
+[HttpPost]
+public IActionResult AddClinician([FromBody] ClinicianInput clinician)
+{
+    try
+    {
+        if (string.IsNullOrWhiteSpace(clinician.FirstName) || string.IsNullOrWhiteSpace(clinician.LastName))
+            return Json(new { success = false, message = "First and last name required." });
+
+        if (string.IsNullOrWhiteSpace(clinician.IdNumber) || clinician.IdNumber.Length != 10)
+            return Json(new { success = false, message = "ID number must be 10 digits." });
+
+        // Generate random GTID
+        var random = new Random();
+        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        var gtid = new string(Enumerable.Repeat(chars, 8)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+
+        // Create folder
+        string clinicianFolder = Path.Combine(_hostingEnvironment.WebRootPath, "clinicianDetails");
+        if (!Directory.Exists(clinicianFolder))
+            Directory.CreateDirectory(clinicianFolder);
+
+        string filePath = Path.Combine(clinicianFolder, $"{gtid}.txt");
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"GTID: {gtid}");
+        sb.AppendLine($"Title: {clinician.Title}");
+        sb.AppendLine($"First Name: {clinician.FirstName}");
+        sb.AppendLine($"Middle Name: {clinician.MiddleName}");
+        sb.AppendLine($"Last Name: {clinician.LastName}");
+        sb.AppendLine($"ID Number: {clinician.IdNumber}");
+        sb.AppendLine($"Created At: {DateTime.Now}");
+
+        System.IO.File.WriteAllText(filePath, sb.ToString());
+
+        return Json(new { success = true, gtid });
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        return Json(new { success = false, message = "Error saving clinician." });
+    }
+}
+
+        public class ClinicianInput
+        {
+            public string Title { get; set; } = string.Empty;
+            public string FirstName { get; set; } = string.Empty;
+            public string MiddleName { get; set; } = string.Empty;
+            public string LastName { get; set; } = string.Empty;
+            public string IdNumber { get; set; } = string.Empty;
+        }
+}
 }
