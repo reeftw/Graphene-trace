@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Prevent committing files under obj/ or bin/ directories
+set -euo pipefail
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+for f in $STAGED_FILES; do
+  case "$f" in
+    **/obj/*|**/bin/*|GrapheneTrace/obj/*|GrapheneTrace/bin/*)
+      echo "\nERROR: Attempting to commit generated file: $f"
+      echo "Please remove generated files from the commit and ensure .gitignore covers them."
+      echo "You can unstage with: git restore --staged $f" >&2
+      exit 1
+      ;;
+  esac
+done
+
+exit 0
