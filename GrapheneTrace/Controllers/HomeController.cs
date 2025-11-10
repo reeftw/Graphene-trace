@@ -11,6 +11,14 @@ using Microsoft.Extensions.Logging;
 
 namespace GrapheneTrace.Controllers
 {
+    // This is the DTO class for the new Admin Request feature
+    // Placing it here to keep everything in one file as requested.
+    public class AdminRequestInput
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Comment { get; set; } = string.Empty;
+    }
+
     // NOTE: Ensure your GrapheneTrace.Models namespace is correct for all models used.
     public class HomeController : Controller
     {
@@ -19,6 +27,9 @@ namespace GrapheneTrace.Controllers
 
         private const string DATA_FOLDER_NAME = "wwwroot/GTLBData";
         private const string COMMENTS_FOLDER_NAME = "wwwroot/GTLBComments";
+        // --- NEW CONSTANT ---
+        // Placing this in a secure "AppData" folder outside of wwwroot
+        private const string ADMIN_REQUESTS_FOLDER_NAME = "AppData/AdminRequests";
         private const int MATRIX_SIZE = 32;
         private const int ALERT_THRESHOLD = 200;
         private const int MIN_CONTACT_PRESSURE = 10;
@@ -279,6 +290,64 @@ namespace GrapheneTrace.Controllers
             }
         }
 
+        // --- NEW ACTION: To save an admin request ---
+        [HttpPost]
+        public IActionResult SubmitAdminRequest([FromBody] AdminRequestInput request)
+        {
+            // 1. Validate the input
+            if (request == null || string.IsNullOrWhiteSpace(request.UserId) || string.IsNullOrWhiteSpace(request.Comment))
+            {
+                _logger.LogWarning("Admin request failed validation: ID or Comment was missing.");
+                return BadRequest(new { message = "ID and comment are required." });
+            }
+
+            try
+            {
+                // 2. Define the file path
+                // We use ContentRootPath, which is the application's root (NOT wwwroot)
+                string requestsFolderPath = Path.Combine(_hostingEnvironment.ContentRootPath, ADMIN_REQUESTS_FOLDER_NAME);
+                
+                // Ensure the directory exists
+                Directory.CreateDirectory(requestsFolderPath);
+                
+                string filePath = Path.Combine(requestsFolderPath, "admin_requests.csv");
+
+                // 3. Prepare the CSV data
+                string timestamp = DateTime.UtcNow.ToString("o"); // ISO 8601 format (good for sorting)
+                
+                // Sanitize fields for CSV (wrap in quotes, escape existing quotes)
+                string safeUserId = $"\"{request.UserId.Replace("\"", "\"\"")}\"";
+                string safeComment = $"\"{request.Comment.Replace("\"", "\"\"")}\"";
+
+                string csvLine = $"{timestamp},{safeUserId},{safeComment}{Environment.NewLine}";
+
+                // 4. Write to the file
+                bool fileExists = System.IO.File.Exists(filePath);
+                
+                // Use 'append: true' to add to the file without overwriting
+                using (StreamWriter sw = new StreamWriter(filePath, append: true, Encoding.UTF8))
+                {
+                    if (!fileExists)
+                    {
+                        // Write the header only if the file is new
+                        sw.Write("Timestamp,UserId,Comment" + Environment.NewLine);
+                    }
+                    sw.Write(csvLine);
+                }
+
+                _logger.LogInformation("Saved new admin request from {UserId}", request.UserId);
+                
+                // 5. Return a success response
+                return Ok(new { message = "Request submitted successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save admin request for {UserId}", request.UserId);
+                return StatusCode(500, new { message = "An internal error occurred while saving the request." });
+            }
+        }
+
+
         // --- PRIVATE HELPER METHODS ---
 
         private int[,] LoadSingleMatrix(string path)
@@ -411,49 +480,49 @@ namespace GrapheneTrace.Controllers
             return Json(patients);
         }
 
-[HttpPost]
-public IActionResult AddClinician([FromBody] ClinicianInput clinician)
-{
-    try
-    {
-        if (string.IsNullOrWhiteSpace(clinician.FirstName) || string.IsNullOrWhiteSpace(clinician.LastName))
-            return Json(new { success = false, message = "First and last name required." });
+        [HttpPost]
+        public IActionResult AddClinician([FromBody] ClinicianInput clinician)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(clinician.FirstName) || string.IsNullOrWhiteSpace(clinician.LastName))
+                    return Json(new { success = false, message = "First and last name required." });
 
-        if (string.IsNullOrWhiteSpace(clinician.IdNumber) || clinician.IdNumber.Length != 10)
-            return Json(new { success = false, message = "ID number must be 10 digits." });
+                if (string.IsNullOrWhiteSpace(clinician.IdNumber) || clinician.IdNumber.Length != 10)
+                    return Json(new { success = false, message = "ID number must be 10 digits." });
 
-        // Generate random GTID
-        var random = new Random();
-        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        var gtid = new string(Enumerable.Repeat(chars, 8)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
+                // Generate random GTID
+                var random = new Random();
+                const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+                var gtid = new string(Enumerable.Repeat(chars, 8)
+                    .Select(s => s[random.Next(s.Length)]).ToArray());
 
-        // Create folder
-        string clinicianFolder = Path.Combine(_hostingEnvironment.WebRootPath, "clinicianDetails");
-        if (!Directory.Exists(clinicianFolder))
-            Directory.CreateDirectory(clinicianFolder);
+                // Create folder
+                string clinicianFolder = Path.Combine(_hostingEnvironment.WebRootPath, "clinicianDetails");
+                if (!Directory.Exists(clinicianFolder))
+                    Directory.CreateDirectory(clinicianFolder);
 
-        string filePath = Path.Combine(clinicianFolder, $"{gtid}.txt");
+                string filePath = Path.Combine(clinicianFolder, $"{gtid}.txt");
 
-        var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"GTID: {gtid}");
-        sb.AppendLine($"Title: {clinician.Title}");
-        sb.AppendLine($"First Name: {clinician.FirstName}");
-        sb.AppendLine($"Middle Name: {clinician.MiddleName}");
-        sb.AppendLine($"Last Name: {clinician.LastName}");
-        sb.AppendLine($"ID Number: {clinician.IdNumber}");
-        sb.AppendLine($"Created At: {DateTime.Now}");
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine($"GTID: {gtid}");
+                sb.AppendLine($"Title: {clinician.Title}");
+                sb.AppendLine($"First Name: {clinician.FirstName}");
+                sb.AppendLine($"Middle Name: {clinician.MiddleName}");
+                sb.AppendLine($"Last Name: {clinician.LastName}");
+                sb.AppendLine($"ID Number: {clinician.IdNumber}");
+                sb.AppendLine($"Created At: {DateTime.Now}");
 
-        System.IO.File.WriteAllText(filePath, sb.ToString());
+                System.IO.File.WriteAllText(filePath, sb.ToString());
 
-        return Json(new { success = true, gtid });
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-        return Json(new { success = false, message = "Error saving clinician." });
-    }
-}
+                return Json(new { success = true, gtid });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return Json(new { success = false, message = "Error saving clinician." });
+            }
+        }
 
         public class ClinicianInput
         {
@@ -463,5 +532,5 @@ public IActionResult AddClinician([FromBody] ClinicianInput clinician)
             public string LastName { get; set; } = string.Empty;
             public string IdNumber { get; set; } = string.Empty;
         }
-}
+    }
 }
