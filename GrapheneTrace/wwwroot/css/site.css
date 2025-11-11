@@ -68,11 +68,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px;
-    text-align: center;
-    color: #555;
-    padding: 15px;
+    overflow: hidden; /* ensures the canvas fits neatly */
+    padding: 0;
 }
+
 .glanceable-info {
     width: 55%;
     padding: 20px;

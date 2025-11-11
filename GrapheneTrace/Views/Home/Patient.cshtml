@@ -25,34 +25,13 @@
 
     <div class="dashboard-grid">
         <div class="metric-card">
-            <div class="simple-graph-placeholder">*Simple graph or heatmap of pressure*</div>
+            <div class="simple-graph-placeholder">
+                @await Html.PartialAsync("_HeatmapPartial", Model.Heatmap)
+            </div>
+
             <div class="glanceable-info">
                 <h3>@Model.PressureData.Title</h3>
                 <p>@Model.PressureData.GlanceableInfo</p>
-            </div>
-        </div>
-
-        <div class="metric-card">
-            <div class="simple-graph-placeholder">*Simple graph of Heart rate if device is connected*</div>
-            <div class="glanceable-info">
-                <h3>@Model.HeartRateData.Title</h3>
-                <p>@Model.HeartRateData.GlanceableInfo</p>
-            </div>
-        </div>
-
-        <div class="metric-card">
-            <div class="simple-graph-placeholder">*Simple graph for miscellaneous data*</div>
-            <div class="glanceable-info">
-                <h3>@Model.MiscData1.Title</h3>
-                <p>@Model.MiscData1.GlanceableInfo</p>
-            </div>
-        </div>
-
-        <div class="metric-card">
-            <div class="simple-graph-placeholder">*Simple graph for extra miscellaneous data*</div>
-            <div class="glanceable-info">
-                <h3>@Model.MiscData2.Title</h3>
-                <p>@Model.MiscData2.GlanceableInfo</p>
             </div>
         </div>
     </div>

@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
-      "projectName": "GrapheneTrace",
-      "projectPath": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/GrapheneTrace.csproj",
+      "projectUniqueName": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
+      "projectName": "PatientMetadata",
+      "projectPath": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
       "packagesPath": "/Users/anakharajthampitharajayaraj/.nuget/packages/",
-      "outputPath": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/obj/",
+      "outputPath": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/Models/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/anakharajthampitharajayaraj/.nuget/NuGet/NuGet.Config"
@@ -61,9 +61,6 @@
         "assetTargetFallback": true,
         "warn": true,
         "frameworkReferences": {
-          "Microsoft.AspNetCore.App": {
-            "privateAssets": "none"
-          },
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
