@@ -22,9 +22,7 @@
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/scopedcss/bundle/GrapheneTrace.styles.css
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/scopedcss/projectbundle/GrapheneTrace.bundle.scp.css
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/s0jyh62der-i6jx17zrls.gz
-/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/77u0y0ef8d-lng0pnq83m.gz
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/vw95pcb6c6-61n19gt1b8.gz
-/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/48tbst4v7n-n3ye9sxkvb.gz
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/19k0epbovs-wybqe6y98x.gz
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/g8eu300sdj-hcqtc2xeyx.gz
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/jvdnw68ml8-y5memwkelc.gz
@@ -117,6 +115,7 @@
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.pdb
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.genruntimeconfig.cache
 /Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/ref/GrapheneTrace.dll
+<<<<<<< HEAD
 /Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/bin/Debug/net9.0/appsettings.Development.json
 /Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/bin/Debug/net9.0/appsettings.json
 /Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/bin/Debug/net9.0/Models/obj/PatientMetadata.csproj.nuget.dgspec.json
@@ -234,3 +233,11 @@
 /Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/GrapheneTrace.genruntimeconfig.cache
 /Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/ref/GrapheneTrace.dll
 /Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/77u0y0ef8d-iwhg5i18vc.gz
+=======
+/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/5coxwk3a6m-wbxmj4fway.gz
+>>>>>>> a364a9a (Hopefully fixed)
+/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/bin/Debug/net9.0/Models/obj/PatientMetadata.csproj.nuget.dgspec.json
+/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/bin/Debug/net9.0/Models/obj/project.assets.json
+/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/77u0y0ef8d-iwhg5i18vc.gz
+/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/c4k9hokuzp-d2l3n3l3xr.gz
+/Users/vivekvarijakshan/ReeAss/Graphene-trace/GrapheneTrace/obj/Debug/net9.0/compressed/48tbst4v7n-8r7694infi.gz

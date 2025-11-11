@@ -326,5 +326,126 @@ namespace GrapheneTrace.Controllers
             };
         }
 
+        // --- Comment and Admin Request Endpoints ---
+
+        [HttpPost]
+        public IActionResult SaveComment(string patientId, string fileName, string comment)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(patientId) || string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(comment))
+                    return BadRequest("Missing required fields");
+
+                string commentsDir = Path.Combine(_hostingEnvironment.WebRootPath ?? _hostingEnvironment.ContentRootPath, "GTLBComments");
+                if (!Directory.Exists(commentsDir)) Directory.CreateDirectory(commentsDir);
+
+                string patientCommentsFile = Path.Combine(commentsDir, $"{patientId}_comments.csv");
+
+                // Ensure header exists
+                if (!System.IO.File.Exists(patientCommentsFile))
+                {
+                    System.IO.File.WriteAllText(patientCommentsFile, "Timestamp,FileName,Comment\n", Encoding.UTF8);
+                }
+
+                // Escape double-quotes in comment and wrap in quotes
+                string safeComment = comment.Replace("\"", "\"\"");
+                string line = $"{DateTime.UtcNow:o},{fileName},\"{safeComment}\"\n";
+
+                System.IO.File.AppendAllText(patientCommentsFile, line, Encoding.UTF8);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save comment for {Patient} {File}", patientId, fileName);
+                return StatusCode(500, "Failed to save comment");
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetAllComments()
+        {
+            var results = new List<object>();
+            try
+            {
+                string commentsDir = Path.Combine(_hostingEnvironment.WebRootPath ?? _hostingEnvironment.ContentRootPath, "GTLBComments");
+                if (!Directory.Exists(commentsDir)) return Json(results);
+
+                var files = Directory.GetFiles(commentsDir, "*_comments.csv");
+                foreach (var f in files)
+                {
+                    string patientId = Path.GetFileName(f).Split('_')[0];
+                    var lines = System.IO.File.ReadAllLines(f);
+                    if (lines.Length <= 1) continue; // no data
+
+                    // skip header
+                    foreach (var raw in lines.Skip(1))
+                    {
+                        if (string.IsNullOrWhiteSpace(raw)) continue;
+                        // naive parse: timestamp,fileName,comment (comment may contain commas)
+                        int idx1 = raw.IndexOf(',');
+                        if (idx1 < 0) continue;
+                        int idx2 = raw.IndexOf(',', idx1 + 1);
+                        if (idx2 < 0) continue;
+
+                        string ts = raw.Substring(0, idx1);
+                        string fileName = raw.Substring(idx1 + 1, idx2 - idx1 - 1);
+                        string commentField = raw.Substring(idx2 + 1).Trim();
+                        if (commentField.StartsWith("\"") && commentField.EndsWith("\""))
+                        {
+                            commentField = commentField.Substring(1, commentField.Length - 2).Replace("\"\"", "\"");
+                        }
+
+                        DateTime.TryParse(ts, out DateTime when);
+
+                        results.Add(new {
+                            timestamp = when.ToUniversalTime(),
+                            patientId = patientId,
+                            fileName = fileName,
+                            comment = commentField
+                        });
+                    }
+                }
+
+                // newest first
+                var ordered = results.OrderByDescending(r => ((DateTime)((dynamic)r).timestamp)).ToList();
+                return Json(ordered);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading comments");
+                return StatusCode(500, "Error reading comments");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SubmitAdminRequest([FromBody] AdminRequestInput input)
+        {
+            try
+            {
+                if (input == null || string.IsNullOrWhiteSpace(input.UserId) || string.IsNullOrWhiteSpace(input.Comment))
+                    return BadRequest(new { message = "UserId and Comment are required" });
+
+                string adminDir = Path.Combine(_hostingEnvironment.ContentRootPath ?? _hostingEnvironment.WebRootPath, ADMIN_REQUESTS_FOLDER_NAME);
+                if (!Directory.Exists(adminDir)) Directory.CreateDirectory(adminDir);
+
+                string adminFile = Path.Combine(adminDir, "admin_requests.csv");
+                if (!System.IO.File.Exists(adminFile))
+                {
+                    System.IO.File.WriteAllText(adminFile, "Timestamp,UserId,Comment\n", Encoding.UTF8);
+                }
+
+                string safe = input.Comment.Replace("\"", "\"\"");
+                string line = $"{DateTime.UtcNow:o},{input.UserId},\"{safe}\"\n";
+                System.IO.File.AppendAllText(adminFile, line, Encoding.UTF8);
+
+                return Ok(new { message = "Submitted" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to submit admin request");
+                return StatusCode(500, new { message = "Failed to submit request" });
+            }
+        }
+
     }
 }
