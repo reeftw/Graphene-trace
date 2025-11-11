@@ -1,175 +1,43 @@
 ﻿@model GrapheneTrace.Models.HeatmapData
 
-<div class="heatmap-row">
-    <!-- === Left Heatmap Box === -->
-    <div class="heatmap-left">
-        <p class="matrix-info">
-            Matrix size: @Model.PressureMatrix.Count × @(Model.PressureMatrix.FirstOrDefault()?.Count ?? 0)
-        </p>
-
-        <div class="heatmap-box">
-            <canvas id="pressureHeatmap"></canvas>
-        </div>
-
-        <div class="heatmap-meta">
-            <p><strong>File:</strong> @Model.GTLBData</p>
-            <p><strong>Patient ID:</strong> @Model.PatientId</p>
-            <p><strong>Peak Pressure:</strong> @Model.PeakPressureIndex</p>
-            <p><strong>Contact Area:</strong> @Model.ContactAreaPercent %</p>
-            <p><strong>Alert:</strong> @(Model.IsAlertGenerated ? "⚠️ Yes" : "✅ No")</p>
-        </div>
+<div class="flex flex-col md:flex-row gap-6">
+    <div>
+        <table class="full-heatmap-table">
+            @for (int i = 0; i < Model.PressureMatrix.Count; i++)
+            {
+                <tr>
+                @for (int j = 0; j < Model.PressureMatrix[i].Count; j++)
+                {
+                    var val = Model.PressureMatrix[i][j];
+                    string color = GetColorForValue(val);
+                    <td style="width:10px;height:10px;background-color:@color;"></td>
+                }
+                </tr>
+            }
+        </table>
     </div>
-
-    <!-- === Right Description Panel === -->
-    <div class="heatmap-right">
-        <h4 class="heatmap-title">Pressure Heatmap</h4>
-        <p class="heatmap-description">Latest sensor data visualization.</p>
+    <div class="p-2">
+        <h3 class="text-lg font-semibold mb-2">Metrics</h3>
+        <p>Peak Pressure: <strong>@Model.PeakPressureIndex</strong></p>
+    <p>Contact Area: <strong>@(Model.ContactAreaPercent + "%")</strong></p>
+        <p>Alert: <strong>@(Model.IsAlertGenerated ? "Yes" : "No")</strong></p>
     </div>
 </div>
 
-<!-- Chart.js & Matrix Plugin -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.umd.min.js"></script>
-
-<script>
-window.addEventListener("load", function () {
-    const dataMatrix = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PressureMatrix));
-
-    if (!dataMatrix || dataMatrix.length === 0) {
-        console.warn("No matrix data found — skipping heatmap rendering.");
-        return;
+@functions {
+    // Simple color ramp (kept consistent with client-side scale)
+    private string GetColorForValue(int pressure)
+    {
+        if (pressure < 20) return "#0f172a"; // blue-800
+        if (pressure < 40) return "#1e3a8a"; // blue-600
+        if (pressure < 60) return "#06b6d4"; // cyan-500
+        if (pressure < 80) return "#2dd4bf"; // teal-400
+        if (pressure < 100) return "#bef264"; // lime-300
+        if (pressure < 120) return "#f59e0b"; // yellow-400/amber
+        if (pressure < 150) return "#f97316"; // amber-500
+        if (pressure < 180) return "#ea580c"; // orange-600
+        if (pressure < 220) return "#b91c1c"; // red-700
+        return "#7f1d1d"; // red-900
     }
-
-    const ctx = document.getElementById("pressureHeatmap").getContext("2d");
-    const dataPoints = [];
-
-    for (let i = 0; i < dataMatrix.length; i++) {
-        for (let j = 0; j < dataMatrix[i].length; j++) {
-            const value = dataMatrix[i][j];
-            dataPoints.push({ x: j, y: i, v: value });
-        }
-    }
-
-    new Chart(ctx, {
-        type: "matrix",
-        data: {
-            datasets: [{
-                label: "Pressure Map",
-                data: dataPoints,
-                borderWidth: 0,
-                backgroundColor(ctx) {
-                    const value = ctx.dataset.data[ctx.dataIndex].v;
-                    const ratio = Math.min(1, value / 300);
-                    const red = Math.floor(255 * ratio);
-                    const green = Math.floor(255 * (1 - ratio));
-                    return `rgb(${red}, ${green}, 0)`; // red→green gradient
-                },
-                width: ({chart}) => chart.chartArea.width / dataMatrix[0].length,
-                height: ({chart}) => chart.chartArea.height / dataMatrix.length
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: 0 },
-            scales: {
-                x: { display: false, min: 0, max: dataMatrix[0].length },
-                y: { display: false, reverse: true, min: 0, max: dataMatrix.length }
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `Pressure: ${ctx.raw.v}`
-                    }
-                }
-            },
-            animation: false
-        }
-    });
-});
-</script>
-
-<style>
-/* === MAIN LAYOUT (Side-by-side like 2nd screenshot) === */
-.heatmap-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 20px;
-    width: 100%;
-    max-width: 750px;
-    margin: 0 auto;
 }
 
-/* === LEFT COLUMN === */
-.heatmap-left {
-    width: 260px;
-    background-color: #f2f2f2;
-    border-radius: 14px;
-    padding: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.matrix-info {
-    font-size: 13px;
-    color: #666;
-    text-align: center;
-    margin-bottom: 6px;
-}
-
-/* Heatmap box */
-.heatmap-box {
-    width: 230px;
-    height: 230px;
-    background-color: #fff;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#pressureHeatmap {
-    width: 210px !important;
-    height: 210px !important;
-    border-radius: 8px;
-}
-
-/* Meta info under the heatmap */
-.heatmap-meta {
-    margin-top: 10px;
-    font-size: 0.9em;
-    color: #333;
-    text-align: left;
-    width: 100%;
-}
-.heatmap-meta p {
-    margin: 3px 0;
-}
-
-/* === RIGHT PANEL === */
-.heatmap-right {
-    flex: 1;
-    background-color: #fff;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.heatmap-title {
-    color: #2c6cff;
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-}
-
-.heatmap-description {
-    color: #222;
-    font-size: 0.95rem;
-}
-</style>
