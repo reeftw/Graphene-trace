@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
+      "projectUniqueName": "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
       "projectName": "PatientMetadata",
-      "projectPath": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
+      "projectPath": "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
       "packagesPath": "/Users/anakharajthampitharajayaraj/.nuget/packages/",
-      "outputPath": "/Users/anakharajthampitharajayaraj/IdeaProjects/Graphene-trace/GrapheneTrace/Models/obj/",
+      "outputPath": "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/anakharajthampitharajayaraj/.nuget/NuGet/NuGet.Config"
