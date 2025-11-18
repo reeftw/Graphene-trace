@@ -4,14 +4,16 @@
     ViewData["Title"] = "Patient Home Dashboard";
 }
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <div class="patient-home-container">
 
+    <!-- TOP BAR -->
     <header class="top-bar">
         <button class="menu-toggle-btn" onclick="toggleMenu('left-menu')">☰</button>
 
         <form asp-controller="Home" asp-action="Search" method="post" class="search-bar-form">
             <input type="text" name="searchQuery" placeholder="Search for information, doctors, or alerts..." class="search-input" />
-            <button type="submit" class="search-btn">🔍</button>
         </form>
 
         <div class="top-bar-actions">
@@ -23,30 +25,111 @@
         </div>
     </header>
 
-    <div class="dashboard-grid">
-        <div class="metric-card">
-            <div class="simple-graph-placeholder">
-                @await Html.PartialAsync("_HeatmapPartial", Model.Heatmap)
+    <!-- MAIN DASHBOARD -->
+    <div class="px-10 pt-8" id="dashboardSection">
+
+        <!-- HEATMAP + GRAPH -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- HEATMAP -->
+            <div class="bg-white rounded-2xl shadow-md p-4 relative">
+                <h2 class="text-xl font-semibold mb-3">Live Pressure Heatmap</h2>
+
+                <div class="rounded-xl overflow-hidden border">
+                    @await Html.PartialAsync("_HeatmapPartial", Model.Heatmap)
+                </div>
             </div>
 
-            <div class="glanceable-info">
-                <h3>@Model.PressureData.Title</h3>
-                <p>@Model.PressureData.GlanceableInfo</p>
+            <!-- GRAPH + CONTROLS -->
+            <div class="bg-white rounded-2xl shadow-md p-6">
+
+                <!-- Header controls -->
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <label class="mr-2 font-semibold">Measurement:</label>
+                        <select class="border rounded-lg px-2 py-1">
+                            <option>Peak Pressure</option>
+                            <option>Contact Area</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="mr-2 font-semibold">Select Date:</label>
+                        <input id="dataDatePicker"
+                               type="date"
+                               class="border rounded-lg px-2 py-1 cursor-pointer" />
+                    </div>
+                </div>
+
+                <!-- Peak pressure graph -->
+                <div class="w-full h-64">
+                    <canvas id="peakPressureChart"></canvas>
+                </div>
+
+                <!-- Slider scrubber for frames -->
+                <input id="frameSlider"
+                       type="range"
+                       min="0"
+                       max="@(Model.Heatmap.TotalFrames > 0 ? Model.Heatmap.TotalFrames - 1 : 0)"
+                       value="0"
+                       class="w-full mt-4 accent-blue-500" />
+
+                <!-- Simple frame labels -->
+                <div class="flex justify-between mt-4 text-gray-500 text-xs">
+                    <span>Frame 0</span>
+                    <span>Mid</span>
+                    <span>Last</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- METRIC CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                <h3 class="text-gray-600">Risk Score</h3>
+                <p id="metric-risk" class="text-4xl font-bold text-blue-600 mt-2">
+                    @(Model.Heatmap.IsAlertGenerated ? "7.3" : "3.1")<span class="text-xl">/10</span>
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                <h3 class="text-gray-600">Contact Area</h3>
+                <p id="metric-contact" class="text-4xl font-bold text-blue-600 mt-2">
+                    @Model.Heatmap.ContactAreaPercent%
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                <h3 class="text-gray-600">Peak Pressure</h3>
+                <p id="metric-peak" class="text-4xl font-bold text-blue-600 mt-2">
+                    @Model.Heatmap.PeakPressureIndex<span class="text-xl"> mmHg</span>
+                </p>
             </div>
         </div>
     </div>
-    
+
+    <!-- LEFT MENU -->
     <div id="left-menu" class="pop-up-menu left-menu-pop-up">
         <div class="pop-up-header">
             <h2>@Model.PatientName</h2>
             <button onclick="toggleMenu('left-menu')" class="close-btn">X</button>
         </div>
+
         <ul class="menu-top-list">
-            <li><a href="#">View Heat Map</a></li>
+
+            <!-- NEW BUTTON -->
+            <li>
+                <button onclick="showDashboardSection()" 
+                        class="w-full text-left py-3 font-medium hover:text-blue-600">
+                    🔥 View Heat Map
+                </button>
+            </li>
+
             <li><a href="#">View Clinician Feedback</a></li>
             <li><a href="#">View Alerts @(Model.HasNewAlerts ? "🔴" : "")</a></li>
             <li><a href="#">View Medications</a></li>
         </ul>
+
         <div class="menu-footer">
             <h4>Doctors Visited:</h4>
             <ul>
@@ -58,6 +141,7 @@
         </div>
     </div>
 
+    <!-- RIGHT PROFILE -->
     <div id="right-profile" class="pop-up-menu right-profile-pop-up">
         <div class="pop-up-header">
             <h2>Patient Profile</h2>
@@ -77,6 +161,170 @@
 <script>
     function toggleMenu(menuId) {
         const menu = document.getElementById(menuId);
-        menu.classList.toggle('open');
+        if (menu) menu.classList.toggle('open');
     }
+
+    function showDashboardSection() {
+        toggleMenu('left-menu');
+        const section = document.getElementById('dashboardSection');
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const PATIENT_ID = "@Model.Heatmap.PatientId";
+
+        const slider = document.getElementById("frameSlider");
+        const datePicker = document.getElementById("dataDatePicker");
+        const chartCanvas = document.getElementById("peakPressureChart");
+
+        const riskLabel = document.getElementById("metric-risk");
+        const contactLabel = document.getElementById("metric-contact");
+        const peakLabel = document.getElementById("metric-peak");
+
+        function jsGetColor(v) {
+            if (v < 20) return "#0f172a";
+            if (v < 40) return "#1e3a8a";
+            if (v < 60) return "#06b6d4";
+            if (v < 80) return "#2dd4bf";
+            if (v < 100) return "#bef264";
+            if (v < 120) return "#f59e0b";
+            if (v < 150) return "#f97316";
+            if (v < 180) return "#ea580c";
+            if (v < 220) return "#b91c1c";
+            return "#7f1d1d";
+        }
+
+        function updateHeatmap(frameIndex) {
+            if (!window.frames || !window.frames.length) return;
+            const frame = window.frames[frameIndex];
+            const rows = document.querySelectorAll("#heatmapContainer table tr");
+            if (!rows.length) return;
+
+            for (let i = 0; i < 32 && i < rows.length; i++) {
+                const cells = rows[i].children;
+                for (let j = 0; j < 32 && j < cells.length; j++) {
+                    const v = frame[i][j];
+                    cells[j].style.backgroundColor = jsGetColor(v);
+                }
+            }
+        }
+
+        let peakChart = null;
+        let peakData = [];
+        let labels = [];
+
+        function computePeakDataFromFrames() {
+            peakData = [];
+            labels = [];
+            if (!window.frames || !window.frames.length) return;
+
+            for (let f = 0; f < window.frames.length; f++) {
+                const frame = window.frames[f];
+                let maxVal = 0;
+                for (let i = 0; i < frame.length; i++) {
+                    for (let j = 0; j < frame[i].length; j++) {
+                        const v = frame[i][j];
+                        if (v > maxVal) maxVal = v;
+                    }
+                }
+                peakData.push(maxVal);
+                labels.push("F" + f);
+            }
+        }
+
+        function createPeakChart() {
+            if (!chartCanvas) return;
+            const ctx = chartCanvas.getContext("2d");
+            if (!ctx) return;
+
+            if (peakChart) {
+                peakChart.destroy();
+            }
+
+            peakChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Peak Pressure (mmHg)",
+                        data: peakData,
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
+                        borderColor: "rgba(37, 99, 235, 1)",
+                        pointRadius: 0,
+                        pointHitRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxTicksLimit: 8 }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 20 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        if (slider) {
+            slider.addEventListener("input", function () {
+                const idx = parseInt(slider.value || "0");
+                window.currentFrame = idx;
+                updateHeatmap(idx);
+            });
+        }
+
+        if (datePicker) {
+            datePicker.addEventListener("change", function () {
+                const selectedDate = datePicker.value;
+                if (!selectedDate || !PATIENT_ID) return;
+
+                fetch(`/Home/GetDataByDate?patientId=${encodeURIComponent(PATIENT_ID)}&date=${encodeURIComponent(selectedDate)}`)
+                    .then(resp => {
+                        if (!resp.ok) throw new Error("Failed to load data for date");
+                        return resp.json();
+                    })
+                    .then(data => {
+                        window.frames = data.frames;
+                        window.totalFrames = data.frames.length;
+                        window.currentFrame = 0;
+
+                        if (slider) {
+                            slider.max = Math.max(window.totalFrames - 1, 0);
+                            slider.value = "0";
+                        }
+
+                        if (contactLabel) contactLabel.textContent = data.contactAreaPercent + "%";
+                        if (peakLabel) peakLabel.textContent = data.peakPressureIndex + " mmHg";
+                        if (riskLabel) {
+                            const risk = data.isAlertGenerated ? "7.3" : "3.1";
+                            riskLabel.innerHTML = risk + "<span class='text-xl'>/10</span>";
+                        }
+
+                        updateHeatmap(0);
+                        computePeakDataFromFrames();
+                        createPeakChart();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert("Could not load data for that date.");
+                    });
+            });
+        }
+
+        computePeakDataFromFrames();
+        createPeakChart();
+        updateHeatmap(0);
+    });
 </script>

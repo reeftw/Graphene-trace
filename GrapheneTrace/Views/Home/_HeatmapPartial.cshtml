@@ -1,43 +1,41 @@
 ﻿@model GrapheneTrace.Models.HeatmapData
 
-<div class="flex flex-col md:flex-row gap-6">
-    <div>
-        <table class="full-heatmap-table">
-            @for (int i = 0; i < Model.PressureMatrix.Count; i++)
-            {
-                <tr>
+<div id="heatmapContainer">
+    <table class="full-heatmap-table">
+        @for (int i = 0; i < Model.PressureMatrix.Count; i++)
+        {
+            <tr>
                 @for (int j = 0; j < Model.PressureMatrix[i].Count; j++)
                 {
                     var val = Model.PressureMatrix[i][j];
                     string color = GetColorForValue(val);
                     <td style="width:10px;height:10px;background-color:@color;"></td>
                 }
-                </tr>
-            }
-        </table>
-    </div>
-    <div class="p-2">
-        <h3 class="text-lg font-semibold mb-2">Metrics</h3>
-        <p>Peak Pressure: <strong>@Model.PeakPressureIndex</strong></p>
-    <p>Contact Area: <strong>@(Model.ContactAreaPercent + "%")</strong></p>
-        <p>Alert: <strong>@(Model.IsAlertGenerated ? "Yes" : "No")</strong></p>
-    </div>
+            </tr>
+        }
+    </table>
 </div>
 
+<script>
+    // Expose all frames + basic info to JavaScript so slider & charts can use them
+    window.frames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Frames));
+    window.totalFrames = @Model.TotalFrames;
+    window.currentFrame = @Model.CurrentFrame;
+</script>
+
 @functions {
-    // Simple color ramp (kept consistent with client-side scale)
+    // Same colour scale you were using before
     private string GetColorForValue(int pressure)
     {
-        if (pressure < 20) return "#0f172a"; // blue-800
-        if (pressure < 40) return "#1e3a8a"; // blue-600
-        if (pressure < 60) return "#06b6d4"; // cyan-500
-        if (pressure < 80) return "#2dd4bf"; // teal-400
-        if (pressure < 100) return "#bef264"; // lime-300
-        if (pressure < 120) return "#f59e0b"; // yellow-400/amber
-        if (pressure < 150) return "#f97316"; // amber-500
-        if (pressure < 180) return "#ea580c"; // orange-600
-        if (pressure < 220) return "#b91c1c"; // red-700
-        return "#7f1d1d"; // red-900
+        if (pressure < 20) return "#0f172a"; // dark blue
+        if (pressure < 40) return "#1e3a8a";
+        if (pressure < 60) return "#06b6d4";
+        if (pressure < 80) return "#2dd4bf";
+        if (pressure < 100) return "#bef264";
+        if (pressure < 120) return "#f59e0b";
+        if (pressure < 150) return "#f97316";
+        if (pressure < 180) return "#ea580c";
+        if (pressure < 220) return "#b91c1c";
+        return "#7f1d1d"; // dark red
     }
 }
-

@@ -1,65 +1,64 @@
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace GrapheneTrace.Models
 {
     /// <summary>
-    /// Represents pressure sensor data and analysis for a patient's pressure map reading.
-    /// This model is used to display and analyze 32x32 pressure matrices in the heatmap view.
+    /// Represents pressure sensor data and analysis for a patient's pressure map readings.
+    /// Supports multiple frames (time series) from a CSV file.
     /// </summary>
     public class HeatmapData
     {
-        /// <summary>
-        /// The 32x32 pressure matrix stored as a list of lists for Razor view compatibility.
-        /// Each value represents pressure in mmHg at a specific sensor point.
-        /// </summary>
-        [Required]
-        public List<List<int>> PressureMatrix { get; set; } = new List<List<int>>();
+        // ======== MULTI-FRAME SUPPORT =========
 
         /// <summary>
-        /// Current matrix index when viewing multiple frames of pressure data.
+        /// All frames loaded from the CSV.
+        /// Each frame is a 32x32 matrix: List[row][col] = pressure value.
         /// </summary>
-        [Range(0, int.MaxValue, ErrorMessage = "Matrix index must be non-negative")]
-        public int MatrixIndex { get; set; }
+        public List<List<List<int>>> Frames { get; set; } = new();
 
         /// <summary>
-        /// Total number of pressure matrices available in the dataset.
+        /// Index of the current frame to display.
         /// </summary>
-        [Range(1, int.MaxValue, ErrorMessage = "Must have at least one pressure matrix")]
-        public int TotalMatrices { get; set; }
+        public int CurrentFrame { get; set; } = 0;
 
         /// <summary>
-        /// Maximum pressure value found in the matrix, measured in mmHg.
-        /// Used for alert generation and clinical assessment.
+        /// Total number of frames available.
         /// </summary>
-        [Range(0, int.MaxValue, ErrorMessage = "Peak pressure must be non-negative")]
+        public int TotalFrames => Frames.Count;
+
+        /// <summary>
+        /// Convenience property to get the current 32x32 matrix for display.
+        /// </summary>
+        public List<List<int>> PressureMatrix =>
+            Frames.Count == 0 ? new List<List<int>>() : Frames[CurrentFrame];
+
+        // ======== METRICS =========
+
+        /// <summary>
+        /// Maximum pressure value found in the current frame.
+        /// </summary>
         public int PeakPressureIndex { get; set; }
 
         /// <summary>
-        /// Percentage of sensor points registering pressure above the minimum threshold.
-        /// Indicates the total contact area between patient and surface.
+        /// Percentage of sensor points registering pressure above threshold in the current frame.
         /// </summary>
-        [Range(0, 100, ErrorMessage = "Contact area percentage must be between 0 and 100")]
         public int ContactAreaPercent { get; set; }
 
         /// <summary>
-        /// Indicates whether the pressure readings exceed safe thresholds.
-        /// True if PeakPressureIndex >= ALERT_THRESHOLD (200 mmHg).
+        /// True if pressure exceeds alert threshold in the current frame.
         /// </summary>
         public bool IsAlertGenerated { get; set; }
 
-        /// <summary>
-        /// Reference to the source data file name.
-        /// </summary>
-        [Required(ErrorMessage = "Data source file name is required")]
-        [RegularExpression(@"^[\w\-. ]+$", ErrorMessage = "Invalid file name format")]
-        public string GTLBData { get; set; } = string.Empty;
+        // ======== IDENTIFIERS =========
 
         /// <summary>
         /// Unique identifier for the patient associated with this pressure data.
         /// </summary>
-        [Required(ErrorMessage = "Patient ID is required")]
-        [RegularExpression(@"^[a-fA-F0-9]{8}$", ErrorMessage = "Invalid patient ID format")]
         public string PatientId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Reference to the source data file name (plus optional last comment).
+        /// </summary>
+        public string GTLBData { get; set; } = string.Empty;
     }
 }

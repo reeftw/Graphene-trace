@@ -71,45 +71,44 @@ namespace GrapheneTrace.Controllers
 
                 if (latestFile != null)
                 {
-                    int[,] matrix = LoadSingleMatrix(latestFile);
+                    var frames = LoadAllFrames(latestFile);
 
-                    var matrixAsList = new List<List<int>>();
-                    for (int i = 0; i < MATRIX_SIZE; i++)
+                    if (frames.Count == 0)
                     {
-                        var row = new List<int>();
-                        for (int j = 0; j < MATRIX_SIZE; j++)
-                            row.Add(matrix[i, j]);
-                        matrixAsList.Add(row);
+                        _logger.LogWarning("No frames loaded from file {File} for patient {PatientId}", latestFile, patientId);
                     }
-
-                    var heatmapData = new HeatmapData
+                    else
                     {
-                        PressureMatrix = matrixAsList,
-                        PatientId = patientId,
-                        GTLBData = Path.GetFileName(latestFile),
-                        TotalMatrices = 1,
-                        MatrixIndex = 0
-                    };
-
-                    CalculateMetrics(heatmapData);
-
-                    string commentFile = Path.Combine(commentsRoot, $"{patientId}_comments.csv");
-                    if (System.IO.File.Exists(commentFile))
-                    {
-                        var lines = System.IO.File.ReadAllLines(commentFile);
-                        if (lines.Length > 1)
+                        var heatmapData = new HeatmapData
                         {
-                            var lastLine = lines.Last();
-                            var parts = lastLine.Split(',');
-                            if (parts.Length >= 3)
+                            Frames = frames,
+                            CurrentFrame = 0,
+                            PatientId = patientId,
+                            GTLBData = Path.GetFileName(latestFile)
+                        };
+
+                        // Compute metrics from the first frame
+                        CalculateMetrics(heatmapData);
+
+                        // Append latest comment (if any) to GTLBData string
+                        string commentFile = Path.Combine(commentsRoot, $"{patientId}_comments.csv");
+                        if (System.IO.File.Exists(commentFile))
+                        {
+                            var lines = System.IO.File.ReadAllLines(commentFile);
+                            if (lines.Length > 1)
                             {
-                                var comment = parts[2].Trim('"');
-                                heatmapData.GTLBData += $" | Comment: {comment}";
+                                var lastLine = lines.Last();
+                                var parts = lastLine.Split(',');
+                                if (parts.Length >= 3)
+                                {
+                                    var comment = parts[2].Trim('"');
+                                    heatmapData.GTLBData += $" | Comment: {comment}";
+                                }
                             }
                         }
-                    }
 
-                    model.Heatmap = heatmapData;
+                        model.Heatmap = heatmapData;
+                    }
                 }
                 else
                 {
@@ -209,17 +208,26 @@ namespace GrapheneTrace.Controllers
 
             try
             {
-                int[,] requestedMatrix = LoadSingleMatrix(fullPath);
-                var matrixAsList = new List<List<int>>();
-
-                for (int i = 0; i < MATRIX_SIZE; i++)
+                if (!System.IO.File.Exists(fullPath))
                 {
-                    matrixAsList.Add(new List<int>());
-                    for (int j = 0; j < MATRIX_SIZE; j++)
-                        matrixAsList[i].Add(requestedMatrix[i, j]);
+                    return StatusCode(404, $"Data file not found: {fullPath}");
                 }
 
-                var model = new HeatmapData { PressureMatrix = matrixAsList, TotalMatrices = 1 };
+                var frames = LoadAllFrames(fullPath);
+
+                if (frames.Count == 0)
+                {
+                    return StatusCode(500, "No frames could be loaded from the specified file.");
+                }
+
+                var model = new HeatmapData
+                {
+                    Frames = frames,
+                    CurrentFrame = 0,
+                    PatientId = patientId ?? string.Empty,
+                    GTLBData = Path.GetFileName(fullPath)
+                };
+
                 CalculateMetrics(model);
 
                 return PartialView("_HeatmapPartial", model);
@@ -231,25 +239,97 @@ namespace GrapheneTrace.Controllers
             }
         }
 
-
-
-        private int[,] LoadSingleMatrix(string path)
+        // --- NEW: JSON API FOR CALENDAR (load CSV by date) ---
+        // date: "yyyy-MM-dd", filenames: "<patientId>_yyyyMMdd.csv"
+        [HttpGet]
+        public IActionResult GetDataByDate(string patientId, string date)
         {
-            if (!System.IO.File.Exists(path))
-                throw new FileNotFoundException("The specified data file was not found.", path);
-
-            var lines = System.IO.File.ReadLines(path).Take(MATRIX_SIZE).ToArray();
-            int[,] mat = new int[MATRIX_SIZE, MATRIX_SIZE];
-
-            for (int i = 0; i < lines.Length; i++)
+            try
             {
-                var row = lines[i].Split(',');
-                for (int j = 0; j < MATRIX_SIZE; j++)
+                if (string.IsNullOrWhiteSpace(patientId) || string.IsNullOrWhiteSpace(date))
+                    return BadRequest("patientId and date are required.");
+
+                string dataRoot = Path.Combine(_hostingEnvironment.WebRootPath, "GTLBData");
+
+                string datePart = date.Replace("-", ""); // "2025-10-11" -> "20251011"
+                string pattern = $"{patientId}_{datePart}.csv";
+
+                var file = Directory.GetFiles(dataRoot, pattern)
+                                    .OrderByDescending(f => f)
+                                    .FirstOrDefault();
+
+                if (file == null)
+                    return NotFound("No data file for that date.");
+
+                var frames = LoadAllFrames(file);
+
+                if (frames.Count == 0)
+                    return StatusCode(500, "No frames found in data file.");
+
+                var heatmap = new HeatmapData
                 {
-                    mat[i, j] = (row.Length > j && int.TryParse(row[j].Trim(), out int val)) ? val : 0;
-                }
+                    Frames = frames,
+                    CurrentFrame = 0,
+                    PatientId = patientId,
+                    GTLBData = Path.GetFileName(file)
+                };
+
+                CalculateMetrics(heatmap);
+
+                return Json(new
+                {
+                    frames = heatmap.Frames,
+                    peakPressureIndex = heatmap.PeakPressureIndex,
+                    contactAreaPercent = heatmap.ContactAreaPercent,
+                    isAlertGenerated = heatmap.IsAlertGenerated,
+                    fileName = heatmap.GTLBData
+                });
             }
-            return mat;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading data by date for {patientId} {date}", patientId, date);
+                return StatusCode(500, "Server error loading dated data.");
+            }
+        }
+
+        // --- MULTI-FRAME CSV LOADER ---
+        private List<List<List<int>>> LoadAllFrames(string path)
+        {
+            var lines = System.IO.File.ReadAllLines(path);
+            var frames = new List<List<List<int>>>();
+
+            for (int i = 0; i < lines.Length; i += MATRIX_SIZE)
+            {
+                if (i + MATRIX_SIZE > lines.Length)
+                    break;
+
+                var matrix = new List<List<int>>();
+
+                for (int r = 0; r < MATRIX_SIZE; r++)
+                {
+                    var row = lines[i + r].Split(',');
+                    var rowVals = new List<int>();
+
+                    foreach (var v in row)
+                    {
+                        if (int.TryParse(v.Trim(), out int val))
+                            rowVals.Add(val);
+                        else
+                            rowVals.Add(0);
+                    }
+
+                    while (rowVals.Count < MATRIX_SIZE)
+                        rowVals.Add(0);
+                    if (rowVals.Count > MATRIX_SIZE)
+                        rowVals = rowVals.Take(MATRIX_SIZE).ToList();
+
+                    matrix.Add(rowVals);
+                }
+
+                frames.Add(matrix);
+            }
+
+            return frames;
         }
 
         private void CalculateMetrics(HeatmapData model)
@@ -298,7 +378,6 @@ namespace GrapheneTrace.Controllers
                         maxPressure = Math.Max(maxPressure, val);
                         if (val >= MIN_CONTACT_PRESSURE) contactCount++;
 
-                        // Build a smaller preview matrix (8×8)
                         if (i % (MATRIX_SIZE / MATRIX_PREVIEW_SIZE) == 0 &&
                             j % (MATRIX_SIZE / MATRIX_PREVIEW_SIZE) == 0)
                         {
@@ -341,13 +420,11 @@ namespace GrapheneTrace.Controllers
 
                 string patientCommentsFile = Path.Combine(commentsDir, $"{patientId}_comments.csv");
 
-                // Ensure header exists
                 if (!System.IO.File.Exists(patientCommentsFile))
                 {
                     System.IO.File.WriteAllText(patientCommentsFile, "Timestamp,FileName,Comment\n", Encoding.UTF8);
                 }
 
-                // Escape double-quotes in comment and wrap in quotes
                 string safeComment = comment.Replace("\"", "\"\"");
                 string line = $"{DateTime.UtcNow:o},{fileName},\"{safeComment}\"\n";
 
@@ -375,13 +452,12 @@ namespace GrapheneTrace.Controllers
                 {
                     string patientId = Path.GetFileName(f).Split('_')[0];
                     var lines = System.IO.File.ReadAllLines(f);
-                    if (lines.Length <= 1) continue; // no data
+                    if (lines.Length <= 1) continue;
 
-                    // skip header
                     foreach (var raw in lines.Skip(1))
                     {
                         if (string.IsNullOrWhiteSpace(raw)) continue;
-                        // naive parse: timestamp,fileName,comment (comment may contain commas)
+
                         int idx1 = raw.IndexOf(',');
                         if (idx1 < 0) continue;
                         int idx2 = raw.IndexOf(',', idx1 + 1);
@@ -397,7 +473,8 @@ namespace GrapheneTrace.Controllers
 
                         DateTime.TryParse(ts, out DateTime when);
 
-                        results.Add(new {
+                        results.Add(new
+                        {
                             timestamp = when.ToUniversalTime(),
                             patientId = patientId,
                             fileName = fileName,
@@ -406,7 +483,6 @@ namespace GrapheneTrace.Controllers
                     }
                 }
 
-                // newest first
                 var ordered = results.OrderByDescending(r => ((DateTime)((dynamic)r).timestamp)).ToList();
                 return Json(ordered);
             }
@@ -446,6 +522,5 @@ namespace GrapheneTrace.Controllers
                 return StatusCode(500, new { message = "Failed to submit request" });
             }
         }
-
     }
 }
