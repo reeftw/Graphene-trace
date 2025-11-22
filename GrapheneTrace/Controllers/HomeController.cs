@@ -230,6 +230,7 @@ namespace GrapheneTrace.Controllers
 
                 CalculateMetrics(model);
 
+                ViewData["ShowHeatmapInsights"] = true;
                 return PartialView("_HeatmapPartial", model);
             }
             catch (Exception ex)

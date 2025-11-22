@@ -36,7 +36,13 @@
                 <h2 class="text-xl font-semibold mb-3">Live Pressure Heatmap</h2>
 
                 <div class="rounded-xl overflow-hidden border">
-                    @await Html.PartialAsync("_HeatmapPartial", Model.Heatmap)
+                    @{
+                        var heatmapViewData = new ViewDataDictionary(ViewData)
+                        {
+                            ["ShowHeatmapInsights"] = false
+                        };
+                    }
+                    @await Html.PartialAsync("_HeatmapPartial", Model.Heatmap, heatmapViewData)
                 </div>
             </div>
 

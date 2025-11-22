@@ -53,7 +53,7 @@
                 <button onclick="closeHeatmapModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
             </div>
             
-            <div id="heatmapContainer"></div>
+            <div id="heatmapModalBody"></div>
 
             <div class="mt-6 border-t pt-4">
                 <label for="commentTextArea" class="block text-sm font-medium text-gray-700">Add a Comment</label>
@@ -351,21 +351,123 @@
         return '#ef4444';
     }
 
+    function initializeHeatmapControls() {
+        const slider = document.getElementById('heatmapFrameSlider');
+        const peakLabel = document.getElementById('heatmapPeakValue');
+        const areaLabel = document.getElementById('heatmapAreaValue');
+        const badge = document.getElementById('heatmapAlertBadge');
+        const frameLabel = document.getElementById('heatmapFrameLabel');
+        const table = document.querySelector('#heatmapContainer table');
+
+        if (!slider || !table || !Array.isArray(window.frames) || !window.frames.length) {
+            return;
+        }
+
+        const totalFrames = window.totalFrames || window.frames.length;
+        const cells = Array.from(table.querySelectorAll('td'));
+        const MIN_CONTACT = 10;
+        const ALERT_THRESHOLD = 200;
+
+        slider.min = 0;
+        slider.max = Math.max(totalFrames - 1, 0);
+        slider.value = window.currentFrame || 0;
+        slider.disabled = totalFrames <= 1;
+
+        const getColorForValue = function (v) {
+            if (v < 20) return '#0f172a';
+            if (v < 40) return '#1e3a8a';
+            if (v < 60) return '#06b6d4';
+            if (v < 80) return '#2dd4bf';
+            if (v < 100) return '#bef264';
+            if (v < 120) return '#f59e0b';
+            if (v < 150) return '#f97316';
+            if (v < 180) return '#ea580c';
+            if (v < 220) return '#b91c1c';
+            return '#7f1d1d';
+        };
+
+        const updateFrameLabel = function (idx) {
+            if (!frameLabel) return;
+            const safeTotal = Math.max(totalFrames, 1);
+            const humanIndex = Math.min(idx + 1, safeTotal);
+            frameLabel.textContent = `Frame ${humanIndex} / ${safeTotal}`;
+        };
+
+        const updateMetrics = function (frame) {
+            let peak = 0;
+            let contact = 0;
+            let total = 0;
+
+            frame.forEach(row => {
+                row.forEach(val => {
+                    const v = Number(val) || 0;
+                    total++;
+                    if (v > peak) peak = v;
+                    if (v >= MIN_CONTACT) contact++;
+                });
+            });
+
+            const areaPercent = total ? Math.round((contact / total) * 100) : 0;
+            if (peakLabel) peakLabel.textContent = `${peak} mmHg`;
+            if (areaLabel) areaLabel.textContent = `${areaPercent}%`;
+
+            if (badge) {
+                const isAlert = peak >= ALERT_THRESHOLD;
+                badge.textContent = isAlert ? 'High Risk' : 'Nominal';
+                badge.classList.remove('bg-red-100', 'text-red-700', 'bg-emerald-100', 'text-emerald-700');
+                if (isAlert) {
+                    badge.classList.add('bg-red-100', 'text-red-700');
+                } else {
+                    badge.classList.add('bg-emerald-100', 'text-emerald-700');
+                }
+            }
+        };
+
+        const renderFrame = function (idx) {
+            const frame = window.frames[idx];
+            if (!frame || !cells.length) return;
+
+            let cellPointer = 0;
+            for (let r = 0; r < frame.length; r++) {
+                const row = frame[r];
+                for (let c = 0; c < row.length; c++) {
+                    const cell = cells[cellPointer++];
+                    if (!cell) continue;
+                    cell.style.backgroundColor = getColorForValue(row[c] || 0);
+                }
+            }
+
+            updateFrameLabel(idx);
+            updateMetrics(frame);
+        };
+
+        slider.oninput = function (event) {
+            const idx = parseInt(event.target.value || '0', 10) || 0;
+            window.currentFrame = idx;
+            renderFrame(idx);
+        };
+
+        renderFrame(window.currentFrame || 0);
+    }
+
     function showHeatmap(patientStorageId, fileName) {
         $('#modalTitle').text(`Pressure Map: ${fileName}`);
-        $('#heatmapContainer').html('<div class="text-center text-indigo-600 py-6">Loading...</div>');
+        $('#heatmapModalBody').html('<div class="text-center text-indigo-600 py-6">Loading...</div>');
         $('#heatmapModal').removeClass('hidden');
         $('#heatmapModal').data('patientId', patientStorageId);
         $('#heatmapModal').data('fileName', fileName);
 
         $.get(`/Home/GetHeatmapPartial?patientId=${patientStorageId}&fileName=${fileName}`)
-            .done(data => $('#heatmapContainer').html(data))
-            .fail(() => $('#heatmapContainer').html('<p class="text-red-600 text-center">Error loading heatmap.</p>'));
+            .done(data => {
+                $('#heatmapModalBody').html(data);
+                setTimeout(initializeHeatmapControls, 0);
+            })
+            .fail(() => $('#heatmapModalBody').html('<p class="text-red-600 text-center">Error loading heatmap.</p>'));
     }
 
     function closeHeatmapModal() {
         $('#heatmapModal').addClass('hidden');
-        $('#heatmapContainer').empty();
+        $('#heatmapModalBody').empty();
         $('#commentTextArea').val('');
         $('#commentStatus').empty().attr('class', 'text-sm');
         $('#heatmapModal').removeData('patientId').removeData('fileName');
