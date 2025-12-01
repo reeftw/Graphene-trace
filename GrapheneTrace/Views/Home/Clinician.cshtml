@@ -5,47 +5,84 @@
 <div class="w-full bg-gray-50 min-h-screen">
     <header class="bg-white-100 border-b border-white-200">
         <div class="flex items-center justify-between px-4 py-3">
+            
+            <!-- LEFT SIDE -->
             <div class="flex items-center gap-4">
                 <button id="sidebarToggle" class="p-2 rounded-md hover:bg-green-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
                 </button>
                 <h1 class="text-2xl font-bold text-gray-900">Graphene Trace Portal</h1>
             </div>
-            <div>
-                <button class="p-2 rounded-full border border-green-300"><svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.761 0 5.303.9 7.379 2.418M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+
+            <!-- RIGHT SIDE (PROFILE) -->
+            <div class="relative">
+                <button id="profileBtn" class="p-2 rounded-full border border-green-300 hover:bg-green-100 transition">
+                    <svg class="w-6 h-6 text-green-700" fill="none" stroke="#1f2937" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5.121 17.804A13.937 13.937 0 0112 15c2.761 0 5.303.9 7.379 2.418M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </button>
+
+                <!-- PROFILE MENU -->
+                <div id="profileMenu"
+                    class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg hidden z-50">
+                    
+                    <div class="px-4 py-3 border-b text-sm text-gray-700">
+                        <p class="font-semibold">Clinician ID</p>
+                        <p class="text-indigo-600">CLN0009</p>
+                    </div>
+
+                    <button id="signOutBtn"
+                            class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 text-sm font-medium">
+                        Sign Out
+                    </button>
+                </div>
             </div>
-        </div> 
+
+        </div>
     </header>
 
+    <!-- MAIN GRID -->
     <div class="grid grid-cols-12 gap-6 p-6">
         
+        <!-- SIDEBAR -->
         <aside id="sidebar" class="col-span-3 bg-white rounded-lg shadow p-6 transition-all duration-300">
             <div class="mb-4">
-                <input id="searchInput" type="text" placeholder="Search" class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input id="searchInput" type="text" placeholder="Search" 
+                class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
-            
+
             <nav class="space-y-4">
-                <button class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">New Patients</button>
-                <button class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">Edit Patients</button>
-                <!-- MODIFIED: Added id="adminRequestBtn" to this button -->
-                <button id="adminRequestBtn" class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">Request Admin</button>
-                <button id="prevCommentsButton" class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">Previous Comments</button>
+                <!-- REMOVED NEW PATIENTS + EDIT PATIENTS -->
+                
+                <button id="adminRequestBtn"
+                        class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">
+                    Request Admin
+                </button>
+
+                <button id="prevCommentsButton"
+                        class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">
+                    Previous Comments
+                </button>
             </nav>
         </aside>
 
+        <!-- MAIN CONTENT -->
         <main id="mainContent" class="col-span-9 transition-all duration-300">
             <h2 class="text-4xl font-extrabold text-gray-900 mb-6">Patients</h2>
 
             <div class="bg-white rounded-lg p-8 shadow-inner" style="min-height:420px;">
-                
-                <div id="patientList" class="">
+                <div id="patientList">
                     <div class="text-gray-500">Loading patients...</div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Heatmap Modal -->
+    <!-- HEATMAP MODAL -->
     <div id="heatmapModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4">
             <div class="flex justify-between items-center mb-4">
@@ -53,7 +90,7 @@
                 <button onclick="closeHeatmapModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
             </div>
             
-            <div id="heatmapContainer"></div>
+            <div id="heatmapModalBody"></div>
 
             <div class="mt-6 border-t pt-4">
                 <label for="commentTextArea" class="block text-sm font-medium text-gray-700">Add a Comment</label>
@@ -69,355 +106,478 @@
         </div>
     </div>
 
-    <!-- Previous Comments Modal -->
+    <!-- PREVIOUS COMMENTS MODAL -->
     <div id="commentsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-6 max-w-4xl w-full mx-4" style="max-height: 80vh; display: flex; flex-direction: column;">
+        <div class="bg-white rounded-xl p-6 max-w-4xl w-full mx-4" style="max-height:80vh; display:flex; flex-direction:column;">
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
                 <h2 class="text-2xl font-semibold text-gray-800">All Previous Comments</h2>
                 <button onclick="closeCommentsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
             </div>
             
-            <div id="commentsContainer" class="overflow-y-auto">
-                </div>
+            <div id="commentsContainer" class="overflow-y-auto"></div>
         </div>
     </div>
 
-    <!-- NEW: Admin Request Modal (copied from Admin.cshtml) -->
+    <!-- ADMIN REQUEST MODAL -->
     <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-lg shadow-2xl max-w-md w-full">
-            
-            <!-- Modal Header -->
+
             <div class="flex justify-between items-center p-4 border-b">
                 <h3 class="text-xl font-semibold text-gray-800">New Admin Request</h3>
                 <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
             </div>
 
-            <!-- Modal Body (The Form) -->
             <form id="adminRequestForm" class="p-6">
                 <div class="mb-4">
                     <label for="userId" class="block text-sm font-medium text-gray-700 mb-1">Patient/Clinician ID</label>
-                    <input type="text" id="userId" name="userId" placeholder="Enter ID (e.g., P12345)" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="userId" name="userId" placeholder="Enter ID (e.g., P12345)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div class="mb-4">
                     <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Reason for Request</label>
-                    <textarea id="comment" name="comment" rows="4" placeholder="Please provide a reason for this request..." class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <textarea id="comment" name="comment" rows="4"
+                        placeholder="Please provide a reason for this request..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
 
-                <!-- Feedback Messages -->
                 <div id="successMessage" class="hidden text-sm text-green-600 p-3 bg-green-50 rounded-md mb-4"></div>
                 <div id="errorMessage" class="hidden text-sm text-red-600 p-3 bg-red-50 rounded-md mb-4"></div>
 
-                <!-- Modal Footer (Buttons) -->
                 <div class="flex justify-end space-x-3">
-                    <button type="button" id="cancelBtn" class="px-5 py-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300">
+                    <button type="button" id="cancelBtn"
+                        class="px-5 py-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300">
                         Cancel
                     </button>
-                    <button type="submit" class="px-5 py-2 rounded-md text-white bg-green-600 hover:bg-green-700">
+                    <button type="submit"
+                        class="px-5 py-2 rounded-md text-white bg-green-600 hover:bg-green-700">
                         Submit Request
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
 
 @section Scripts {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script>
-    $(document).ready(function() {
-        // Sidebar toggle logic
-        $('#sidebarToggle').on('click', function() {
-            $('#sidebar').toggleClass('hidden');
-            $('#mainContent').toggleClass('col-span-9').toggleClass('col-span-12');
+$(document).ready(function () {
+
+    // ===========================
+    // PROFILE POPUP
+    // ===========================
+    $('#profileBtn').on('click', function () {
+        $('#profileMenu').toggleClass('hidden');
+    });
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#profileBtn').length &&
+            !$(e.target).closest('#profileMenu').length) {
+            $('#profileMenu').addClass('hidden');
+        }
+    });
+
+    // SIGN OUT REDIRECT
+    $('#signOutBtn').on('click', function () {
+        window.location.href = '/Home/Index';
+    });
+
+    // EXISTING CODE BELOW (UNCHANGED)
+    $('#sidebarToggle').on('click', function () {
+        $('#sidebar').toggleClass('hidden');
+        $('#mainContent').toggleClass('col-span-9 col-span-12');
+    });
+
+    fetchPatientGroups();
+
+    $('#searchInput').on('input', function () {
+        const query = ($(this).val() || '').toLowerCase();
+        renderPatients(patientDataCache.filter(p =>
+            (p.patientId || '').toLowerCase().includes(query)
+        ));
+    });
+
+    $('#prevCommentsButton').on('click', function () {
+        showCommentsModal();
+    });
+
+    $('#adminRequestBtn').on('click', function () {
+        $('#adminModal').removeClass('hidden');
+    });
+
+    $('#closeModalBtn, #cancelBtn').on('click', function () {
+        $('#adminModal').addClass('hidden');
+    });
+
+    $('#adminModal').on('click', function (e) {
+        if (e.target === this) $('#adminModal').addClass('hidden');
+    });
+
+    $('#adminRequestForm').on('submit', async function (e) {
+        e.preventDefault();
+
+        const userId = $('#userId').val();
+        const comment = $('#comment').val();
+
+        if (!userId || !comment) {
+            $('#errorMessage').text('Please fill out all fields.').removeClass('hidden');
+            return;
+        }
+
+        $('#successMessage').text('Request submitted!').removeClass('hidden');
+        setTimeout(() => $('#adminModal').addClass('hidden'), 1500);
+    });
+
+    $('#patientList').on('click', '.viewHeatmapBtn', function () {
+        const patientId = $(this).data('patientId');
+        const fileName = $(this).data('fileName');
+        openHeatmap(patientId, fileName);
+    });
+
+    $('#patientList').on('click', '.commentBtn', function () {
+        const patientId = $(this).data('patientId');
+        const fileName = $(this).data('fileName');
+        openHeatmap(patientId, fileName);
+        $('#commentTextArea').focus();
+    });
+
+    $('#heatmapModal').on('click', function (e) {
+        if (e.target === this) closeHeatmapModal();
+    });
+
+    $('#commentsModal').on('click', function (e) {
+        if (e.target === this) closeCommentsModal();
+    });
+
+    $('#saveCommentButton').on('click', function () {
+        const comment = ($('#commentTextArea').val() || '').trim();
+        if (!selectedPatientId || !selectedFileName) {
+            setCommentStatus('Open a patient file before saving a comment.', true);
+            return;
+        }
+        if (!comment) {
+            setCommentStatus('Please enter a comment.', true);
+            return;
+        }
+
+        setCommentStatus('Saving comment...', false);
+        $.post('/Home/SaveComment', {
+            patientId: selectedPatientId,
+            fileName: selectedFileName,
+            comment: comment
+        })
+            .done(function () {
+                $('#commentTextArea').val('');
+                setCommentStatus('Comment saved.', false);
+            })
+            .fail(function () {
+                setCommentStatus('Failed to save comment. Try again.', true);
+            });
+    });
+
+}); // END DOCUMENT READY
+
+let patientDataCache = [];
+let selectedPatientId = '';
+let selectedFileName = '';
+
+function fetchPatientGroups() {
+    $('#patientList').html('<div class="text-gray-500">Loading patients...</div>');
+
+    $.get('/Home/GetPatientFilesMetadata')
+        .done(function (data) {
+            patientDataCache = normalizePatients(data || []);
+            renderPatients(patientDataCache);
+        })
+        .fail(function () {
+            $('#patientList').html('<div class="bg-red-50 p-6 rounded text-red-700 text-center">Failed to load data.</div>');
         });
+}
 
-        fetchPatientGroups();
+function normalizePatients(raw) {
+    if (!Array.isArray(raw)) return [];
 
-        $('#searchInput').on('input', function() {
-            const query = ($(this).val() || '').toLowerCase();
-            renderPatients(patientDataCache.filter(p => 
-                (p.patientId || '').toLowerCase().includes(query)
-            ));
+    return raw
+        .map(group => {
+            const patientId = group.patientId || group.PatientId || '';
+            const filesRaw = group.files || group.Files || [];
+            const files = Array.isArray(filesRaw) ? filesRaw : [];
+
+            const normalizedFiles = files
+                .map(file => ({
+                    fileName: file.fileName || file.FileName || '',
+                    peakPressure: Number(file.peakPressure ?? file.PeakPressure ?? 0),
+                    contactArea: Number(file.contactArea ?? file.ContactArea ?? 0),
+                    isAlert: Boolean(file.isAlert ?? file.IsAlert),
+                    smallMatrix: file.smallMatrix || file.SmallMatrix || []
+                }))
+                .filter(f => f.fileName);
+
+            normalizedFiles.sort((a, b) => b.fileName.localeCompare(a.fileName));
+
+            return {
+                patientId: patientId,
+                files: normalizedFiles
+            };
+        })
+        .filter(g => g.patientId && g.files.length > 0)
+        .sort((a, b) => a.patientId.localeCompare(b.patientId));
+}
+
+function renderPatients(patients) {
+    if (!patients.length) {
+        $('#patientList').html('<div class="text-gray-500">No patients found.</div>');
+        return;
+    }
+
+    const html = patients.map(renderPatientGroup).join('');
+    $('#patientList').html(html);
+}
+
+function renderPatientGroup(group) {
+    const filesHtml = group.files.map(file => renderFileCard(group.patientId, file)).join('');
+    const fileCountLabel = group.files.length === 1 ? '1 file' : `${group.files.length} files`;
+
+    return `
+        <div class="mb-6 border border-gray-200 rounded-xl bg-white shadow-sm">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                <div>
+                    <p class="text-xs uppercase text-gray-500 tracking-wide">Patient</p>
+                    <p class="text-lg font-semibold text-gray-900">${group.patientId}</p>
+                </div>
+                <span class="text-sm text-gray-600">${fileCountLabel}</span>
+            </div>
+            <div class="grid gap-4 p-4 lg:grid-cols-2">
+                ${filesHtml}
+            </div>
+        </div>
+    `;
+}
+
+function renderFileCard(patientId, file) {
+    const badge = file.isAlert
+        ? '<span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded-full">Alert</span>'
+        : '<span class="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">Nominal</span>';
+
+    return `
+        <div class="bg-gray-50 border border-gray-100 rounded-lg p-4 flex flex-col gap-3 shadow">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="text-sm text-gray-600">${formatFileLabel(file.fileName)}</p>
+                    <p class="font-semibold text-gray-900 leading-tight">${file.fileName}</p>
+                    <p class="text-sm text-gray-700 mt-1">Peak: <span class="font-semibold">${file.peakPressure} mmHg</span></p>
+                    <p class="text-sm text-gray-700">Contact: <span class="font-semibold">${file.contactArea}%</span></p>
+                </div>
+                ${badge}
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex-1">${renderMiniMatrix(file.smallMatrix)}</div>
+            </div>
+            <div class="flex gap-2">
+                <button class="viewHeatmapBtn flex-1 bg-blue-600 text-white py-2 px-3 rounded-md hover:bg-blue-700 transition"
+                        data-patient-id="${patientId}" data-file-name="${file.fileName}">
+                    View heatmap
+                </button>
+                <button class="commentBtn px-3 py-2 border border-gray-300 rounded-md text-gray-800 hover:bg-gray-100 transition"
+                        data-patient-id="${patientId}" data-file-name="${file.fileName}">
+                    Comment
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function formatFileLabel(fileName) {
+    if (!fileName) return 'Unknown file';
+    const match = fileName.match(/^[^_]+_(\d{8})/);
+    if (match) {
+        const raw = match[1];
+        const formatted = `${raw.substring(0, 4)}-${raw.substring(4, 6)}-${raw.substring(6, 8)}`;
+        return `Recorded ${formatted}`;
+    }
+    return 'Data file';
+}
+
+function renderMiniMatrix(matrix) {
+    if (!Array.isArray(matrix) || matrix.length === 0) {
+        return '<div class="text-xs text-gray-500 italic">No preview</div>';
+    }
+
+    const rows = matrix
+        .map(row => {
+            const cells = row
+                .map(val => `<span class="w-3 h-3 block" style="background:${getColorForValue(val)}"></span>`)
+                .join('');
+            return `<div class="flex">${cells}</div>`;
+        })
+        .join('');
+
+    return `<div class="inline-block rounded-md overflow-hidden border border-gray-200 shadow-inner">${rows}</div>`;
+}
+
+function getColorForValue(pressure) {
+    if (pressure < 20) return '#0f172a';
+    if (pressure < 40) return '#1e3a8a';
+    if (pressure < 60) return '#06b6d4';
+    if (pressure < 80) return '#2dd4bf';
+    if (pressure < 100) return '#bef264';
+    if (pressure < 120) return '#f59e0b';
+    if (pressure < 150) return '#f97316';
+    if (pressure < 180) return '#ea580c';
+    if (pressure < 220) return '#b91c1c';
+    return '#7f1d1d';
+}
+
+function openHeatmap(patientId, fileName) {
+    selectedPatientId = patientId;
+    selectedFileName = fileName;
+    $('#commentStatus').text('').removeClass('text-red-600 text-green-600');
+    $('#commentTextArea').val('');
+    $('#modalTitle').text(`Patient ${patientId} • ${fileName}`);
+    $('#heatmapModalBody').html('<div class="p-4 text-gray-600">Loading heatmap...</div>');
+    $('#heatmapModal').removeClass('hidden');
+
+    $.get('/Home/GetHeatmapPartial', { patientId, fileName })
+        .done(function (html) {
+            $('#heatmapModalBody').html(html);
+            setTimeout(initializeHeatmapControls, 0);
+        })
+        .fail(function () {
+            $('#heatmapModalBody').html('<div class="p-4 bg-red-50 text-red-700 rounded">Failed to load heatmap.</div>');
         });
+}
 
-        $('#saveCommentButton').on('click', function() {
-            const commentText = $('#commentTextArea').val();
-            const patientId = $('#heatmapModal').data('patientId');
-            const fileName = $('#heatmapModal').data('fileName');
-            const statusEl = $('#commentStatus');
+function closeHeatmapModal() {
+    $('#heatmapModal').addClass('hidden');
+}
 
-            if (!commentText) {
-                statusEl.text('Comment cannot be empty.').attr('class', 'text-sm text-red-600');
+function setCommentStatus(message, isError) {
+    const el = $('#commentStatus');
+    el.text(message || '');
+    el.removeClass('text-red-600 text-green-600');
+    if (!message) return;
+    el.addClass(isError ? 'text-red-600' : 'text-green-600');
+}
+
+function showCommentsModal() {
+    $('#commentsContainer').html('<div class="p-4 text-gray-600">Loading comments...</div>');
+    $('#commentsModal').removeClass('hidden');
+
+    $.get('/Home/GetAllComments')
+        .done(function (data) {
+            if (!Array.isArray(data) || data.length === 0) {
+                $('#commentsContainer').html('<div class="p-4 text-gray-600">No comments yet.</div>');
                 return;
             }
-            statusEl.text('Saving...').attr('class', 'text-sm text-gray-600');
 
-            $.post('/Home/SaveComment', { patientId: patientId, fileName: fileName, comment: commentText })
-                .done(function() {
-                    statusEl.text('Comment saved!').attr('class', 'text-sm text-green-600');
-                    $('#commentTextArea').val('');
+            const html = data
+                .map(item => {
+                    const ts = item.timestamp ? new Date(item.timestamp) : null;
+                    const when = ts ? ts.toLocaleString() : 'Unknown time';
+                    return `
+                        <div class="py-3 px-2 border-b border-gray-100 last:border-b-0">
+                            <p class="text-sm text-gray-800"><span class="font-semibold">Patient:</span> ${item.patientId}</p>
+                            <p class="text-sm text-gray-800"><span class="font-semibold">File:</span> ${item.fileName}</p>
+                            <p class="text-sm text-gray-600">${when}</p>
+                            <p class="mt-1 text-gray-900">${item.comment}</p>
+                        </div>
+                    `;
                 })
-                .fail(function() {
-                    statusEl.text('Failed to save comment.').attr('class', 'text-sm text-red-600');
-                });
+                .join('');
+
+            $('#commentsContainer').html(`<div class="divide-y divide-gray-100">${html}</div>`);
+        })
+        .fail(function () {
+            $('#commentsContainer').html('<div class="p-4 bg-red-50 text-red-700 rounded">Failed to load comments.</div>');
         });
+}
 
-        // Previous Comments button logic
-        $('#prevCommentsButton').on('click', function() {
-            showCommentsModal();
-        });
+function closeCommentsModal() {
+    $('#commentsModal').addClass('hidden');
+}
 
-        // --- NEW: Admin Request Modal Logic (jQuery version) ---
+function initializeHeatmapControls() {
+    const slider = document.getElementById('heatmapFrameSlider');
+    const peakLabel = document.getElementById('heatmapPeakValue');
+    const areaLabel = document.getElementById('heatmapAreaValue');
+    const badge = document.getElementById('heatmapAlertBadge');
+    const frameLabel = document.getElementById('heatmapFrameLabel');
+    const table = document.querySelector('#heatmapContainer table');
 
-        const adminModal = $('#adminModal');
-        const adminRequestForm = $('#adminRequestForm');
-        const successMessage = $('#successMessage');
-        const errorMessage = $('#errorMessage');
+    if (!slider || !table || !Array.isArray(window.frames) || !window.frames.length) return;
 
-        function showAdminModal() {
-            adminModal.removeClass('hidden');
-            successMessage.addClass('hidden');
-            errorMessage.addClass('hidden');
-            adminRequestForm[0].reset();
-        }
+    const totalFrames = window.totalFrames || window.frames.length;
+    const cells = Array.from(table.querySelectorAll('td'));
+    const MIN_CONTACT = 10;
+    const ALERT_THRESHOLD = 200;
 
-        function hideAdminModal() {
-            adminModal.addClass('hidden');
-        }
+    slider.min = 0;
+    slider.max = Math.max(totalFrames - 1, 0);
+    slider.value = window.currentFrame || 0;
+    slider.disabled = totalFrames <= 1;
 
-        // --- Event Listeners for Admin Modal ---
-        $('#adminRequestBtn').on('click', showAdminModal);
-        $('#closeModalBtn').on('click', hideAdminModal);
-        $('#cancelBtn').on('click', hideAdminModal);
-        
-        adminModal.on('click', function(e) {
-            // Hide if backdrop is clicked
-            if (e.target === adminModal[0]) {
-                hideAdminModal();
-            }
-        });
+    function updateFrameLabel(idx) {
+        if (!frameLabel) return;
+        const safeTotal = Math.max(totalFrames, 1);
+        const humanIndex = Math.min(idx + 1, safeTotal);
+        frameLabel.textContent = `Frame ${humanIndex} / ${safeTotal}`;
+    }
 
-        adminRequestForm.on('submit', async function(e) {
-            e.preventDefault();
-            
-            const userId = $('#userId').val();
-            const comment = $('#comment').val();
+    function updateMetrics(frame) {
+        let peak = 0;
+        let contact = 0;
+        let total = 0;
 
-            if (!userId || !comment) {
-                errorMessage.text('Please fill out both the ID and the reason.').removeClass('hidden');
-                successMessage.addClass('hidden');
-                return;
-            }
-
-            const submitButton = $(this).find('button[type="submit"]');
-            submitButton.prop('disabled', true).text('Submitting...');
-            errorMessage.addClass('hidden');
-
-            try {
-                // This points to the action in HomeController
-                const response = await fetch('/Home/SubmitAdminRequest', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ UserId: userId, Comment: comment })
-                });
-
-                if (response.ok) {
-                    successMessage.text('Request submitted successfully!').removeClass('hidden');
-                    setTimeout(hideAdminModal, 2000);
-                } else {
-                    const errorData = await response.json();
-                    errorMessage.text(`Error: ${errorData.message || 'Could not submit request.'}`).removeClass('hidden');
-                }
-            } catch (error) {
-                errorMessage.text(`Network error: ${error.message}`).removeClass('hidden');
-            } finally {
-                submitButton.prop('disabled', false).text('Submit Request');
-            }
-        });
-
-    }); // <-- End of $(document).ready()
-
-    let patientDataCache = [];
-
-    function fetchPatientGroups() {
-        $.get('/Home/GetPatientFilesMetadata')
-            .done(function(data) {
-                patientDataCache = normalizePatients(data || []);
-                renderPatients(patientDataCache);
-            })
-            .fail(function() {
-                $('#patientList').html('<div class="bg-red-50 p-6 rounded text-red-700 text-center">Failed to load data from backend.</div>');
+        frame.forEach(row => {
+            row.forEach(val => {
+                const v = Number(val) || 0;
+                total++;
+                if (v > peak) peak = v;
+                if (v >= MIN_CONTACT) contact++;
             });
-    }
-
-    function normalizePatients(raw) {
-        return raw.map(pg => {
-            const patientId = pg.patientId || pg.PatientId || pg.storageId || pg.StorageId || '';
-            const storageId = pg.storageId || pg.StorageId || patientId;
-            const filesRaw = pg.files || pg.Files || [];
-            const files = filesRaw.map(f => ({
-                fileName: f.fileName || f.FileName || f.File || '',
-                smallMatrix: f.smallMatrix || f.SmallMatrix || f.MiniMatrix || [],
-                peakPressure: f.peakPressure || f.PeakPressure || f.Peak || 0,
-                contactArea: f.contactArea || f.ContactArea || f.Contact || 0,
-                isAlert: (typeof f.isAlert !== 'undefined') ? f.isAlert : (f.IsAlert || false)
-            }));
-
-            return { patientId, storageId, files };
         });
-    }
 
-    function renderPatients(patients) {
-        const list = $('#patientList');
-        list.empty();
-        if (patients.length === 0) {
-            list.append('<div class="text-center text-gray-500 p-8">No matching patients found.</div>');
-            return;
+        const areaPercent = total ? Math.round((contact / total) * 100) : 0;
+        if (peakLabel) peakLabel.textContent = `${peak} mmHg`;
+        if (areaLabel) areaLabel.textContent = `${areaPercent}%`;
+
+        if (badge) {
+            const isAlert = peak >= ALERT_THRESHOLD;
+            badge.textContent = isAlert ? 'High Risk' : 'Nominal';
+            badge.classList.remove('bg-red-100', 'text-red-700', 'bg-emerald-100', 'text-emerald-700');
+            badge.classList.add(isAlert ? 'bg-red-100' : 'bg-emerald-100', isAlert ? 'text-red-700' : 'text-emerald-700');
         }
-        patients.forEach(p => list.append(createPatientCard(p)));
     }
 
-    function createPatientCard(patient) {
-        const pid = patient.patientId || patient.storageId || '';
-        const card = $('<div>').addClass('bg-white rounded-lg shadow mb-2');
-        const header = $('<div>')
-            .addClass('cursor-pointer text-center py-3 px-4 font-medium text-black bg-#3fa4fc-600 hover:bg-#3fa4fc-700 rounded-lg shadow-md transition-all')
-            .text(pid)
-            .attr('role', 'button')
-            .click(() => togglePatientDetails(pid));
-        const details = $('<div>').attr('id', `details-${pid}`).addClass('mt-2 hidden p-4 border-t border-gray-200');
-        card.append(header).append(details);
-        return card;
-    }
+    function renderFrame(idx) {
+        const frame = window.frames[idx];
+        if (!frame || !cells.length) return;
 
-    function togglePatientDetails(patientId) {
-        const detailsEl = $(`#details-${patientId}`);
-        if (detailsEl.length === 0) return;
-        const isAlreadyOpen = !detailsEl.hasClass('hidden');
-        $('.patient-details-panel').not(detailsEl).addClass('hidden');
-
-        if (isAlreadyOpen) {
-            detailsEl.addClass('hidden');
-        } else {
-            const pg = patientDataCache.find(p => (p.patientId || p.storageId) === patientId);
-            detailsEl.empty();
-            if (!pg || !pg.files || pg.files.length === 0) {
-                detailsEl.append('<div class="text-sm text-gray-600">No files found for this patient.</div>');
-            } else {
-                pg.files.forEach(f => detailsEl.append(createFileEntry(pg.storageId || pg.patientId, f)));
+        let cellPointer = 0;
+        for (let r = 0; r < frame.length; r++) {
+            const row = frame[r];
+            for (let c = 0; c < row.length; c++) {
+                const cell = cells[cellPointer++];
+                if (!cell) continue;
+                cell.style.backgroundColor = getColorForValue(row[c] || 0);
             }
-            detailsEl.addClass('patient-details-panel'); 
-            detailsEl.removeClass('hidden');
-        }
-    }
-
-    function createFileEntry(patientStorageId, file) {
-        const fname = file.fileName || file.FileName || '';
-        const entry = $('<div>').addClass('border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition')
-            .click(() => showHeatmap(patientStorageId, fname));
-        const miniHeatmap = createMiniHeatmap(file.smallMatrix || file.SmallMatrix || []);
-        const metrics = $('<div>').addClass('ml-4 flex-grow')
-            .append($('<h4>').addClass('font-medium text-sm text-gray-900').text(fname))
-            .append($('<p>').addClass('text-xs text-gray-600')
-                .text(`Peak: ${file.peakPressure || file.PeakPressure || 0} mmHg | Area: ${file.contactArea || file.ContactArea || 0}%`));
-        const row = $('<div>').addClass('flex items-start').append(miniHeatmap).append(metrics);
-        entry.append(row);
-        return entry;
-    }
-
-    function createMiniHeatmap(matrix) {
-        const table = $('<table>').addClass('mini-heatmap-table').css({ width: '64px', height: '64px' });
-        (matrix || []).forEach(row => {
-            const tr = $('<tr>');
-            (row || []).forEach(v => tr.append($('<td>').css({
-                width: '8px',
-                height: '8px',
-                backgroundColor: getColor(v || 0)
-            })));
-            table.append(tr);
-        });
-        return table;
-    }
-
-    function getColor(v) {
-        if (v < 20) return '#1e3a8a';
-        if (v < 40) return '#2563eb';
-        if (v < 60) return '#0ea5e9';
-        if (v < 80) return '#14b8a6';
-        if (v < 100) return '#84cc16';
-        if (v < 150) return '#facc15';
-        if (v < 200) return '#fb923c';
-        return '#ef4444';
-    }
-
-    function showHeatmap(patientStorageId, fileName) {
-        $('#modalTitle').text(`Pressure Map: ${fileName}`);
-        $('#heatmapContainer').html('<div class="text-center text-indigo-600 py-6">Loading...</div>');
-        $('#heatmapModal').removeClass('hidden');
-        $('#heatmapModal').data('patientId', patientStorageId);
-        $('#heatmapModal').data('fileName', fileName);
-
-        $.get(`/Home/GetHeatmapPartial?patientId=${patientStorageId}&fileName=${fileName}`)
-            .done(data => $('#heatmapContainer').html(data))
-            .fail(() => $('#heatmapContainer').html('<p class="text-red-600 text-center">Error loading heatmap.</p>'));
-    }
-
-    function closeHeatmapModal() {
-        $('#heatmapModal').addClass('hidden');
-        $('#heatmapContainer').empty();
-        $('#commentTextArea').val('');
-        $('#commentStatus').empty().attr('class', 'text-sm');
-        $('#heatmapModal').removeData('patientId').removeData('fileName');
-    }
-
-    // --- FUNCTIONS FOR COMMENTS MODAL ---
-
-    function showCommentsModal() {
-        const container = $('#commentsContainer');
-        container.html('<div class="text-center text-indigo-600 py-6">Loading all comments...</div>');
-        $('#commentsModal').removeClass('hidden');
-
-        $.get('/Home/GetAllComments')
-            .done(function(comments) {
-                renderComments(comments);
-            })
-            .fail(function() {
-                container.html('<p class="text-red-600 text-center">Error loading comments.</p>');
-            });
-    }
-
-    function closeCommentsModal() {
-        $('#commentsModal').addClass('hidden');
-        $('#commentsContainer').empty();
-    }
-
-    function renderComments(comments) {
-        const container = $('#commentsContainer');
-        container.empty();
-
-        if (!comments || comments.length === 0) {
-            container.html('<div class="text-center text-gray-500 p-8">No comments found.</div>');
-            return;
         }
 
-        // comments are already sorted by the server (newest first)
-        comments.forEach(comment => {
-            const date = new Date(comment.timestamp).toLocaleString();
-
-            const entry = $('<div>').addClass('border-b border-gray-200 p-4');
-            
-            const header = $('<div>').addClass('flex justify-between items-center text-sm mb-2');
-            header.append($('<strong>').addClass('text-indigo-700').text(`Patient: ${comment.patientId}`));
-            header.append($('<span>').addClass('text-gray-500').text(date));
-
-            const file = $('<div>').addClass('text-sm text-gray-600 mb-2').text(`File: ${comment.fileName}`);
-            const text = $('<p>').addClass('text-gray-800').text(comment.comment);
-
-            entry.append(header).append(file).append(text);
-            container.append(entry);
-        });
+        updateFrameLabel(idx);
+        updateMetrics(frame);
     }
+
+    slider.oninput = function (event) {
+        const idx = parseInt(event.target.value || '0', 10) || 0;
+        window.currentFrame = idx;
+        renderFrame(idx);
+    };
+
+    renderFrame(window.currentFrame || 0);
+}
 
 </script>
 }
