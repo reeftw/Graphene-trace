@@ -1,0 +1,31 @@
+@model GrapheneTrace.ViewModels.AlertViewModel
+
+@{
+    ViewData["Title"] = "Alerts";
+}
+
+<div class="max-w-2xl mx-auto mt-10 bg-white shadow-lg rounded-xl p-8">
+
+    <h2 class="text-2xl font-semibold mb-6">Alerts for Patient @Model.PatientId</h2>
+
+    @if (Model.Alerts.Count == 0)
+    {
+        <p class="text-gray-500">No alerts have been generated for this patient.</p>
+    }
+    else
+    {
+        <ul class="list-disc ml-6 space-y-3">
+            @foreach (var alert in Model.Alerts)
+            {
+                <li class="text-red-600">@alert</li>
+            }
+        </ul>
+    }
+
+    <div class="mt-6">
+        <a href="/Home/Patient?patientId=@Model.PatientId"
+           class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            Back to Dashboard
+        </a>
+    </div>
+</div>

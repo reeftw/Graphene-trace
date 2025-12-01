@@ -9,14 +9,13 @@ namespace GrapheneTrace.ViewModels
         public HealthMetric PressureData { get; set; }
         public HeatmapData Heatmap { get; set; } = new HeatmapData();
 
-
         // === Left Menu Pop-up Data ===
         public string PatientName { get; set; } = "Sarah Connor";
         public List<Clinician> VisitedDoctors { get; set; } = new List<Clinician>();
 
         // === Right Profile Pop-up Data ===
         public int UserId { get; set; } = 54321;
-        public string Email { get; set; } = "sarah.c@portal.com";
+        public string Email { get; set; } = "d13043b3@gmail.com";
         public string PhoneNumber { get; set; } = "(555) 987-6543";
         public string MedicalHistorySummary { get; set; } = "Diabetes Type 1, Hypertension (Mild)";
 

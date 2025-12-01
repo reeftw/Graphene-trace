@@ -1,0 +1,42 @@
+@model GrapheneTrace.ViewModels.EditAccountViewModel
+
+@{
+    ViewData["Title"] = "Edit Account";
+}
+
+<div class="max-w-lg mx-auto mt-10 bg-white shadow-lg rounded-xl p-8">
+
+    <h2 class="text-2xl font-semibold mb-6">Edit Account Details</h2>
+
+    <form asp-action="Save" asp-controller="Account" method="post" class="space-y-6">
+
+        <div>
+            <label class="block font-medium">User ID</label>
+            <input asp-for="UserId" class="w-full border rounded p-2" />
+        </div>
+
+        <div>
+            <label class="block font-medium">Email</label>
+            <input asp-for="Email" class="w-full border rounded p-2" />
+        </div>
+
+        <div>
+            <label class="block font-medium">Phone Number</label>
+            <input asp-for="PhoneNumber" class="w-full border rounded p-2" />
+        </div>
+
+        <div>
+            <label class="block font-medium">Medical History</label>
+            <textarea asp-for="MedicalHistory" rows="4" class="w-full border rounded p-2"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            Save Changes
+        </button>
+
+        @if (TempData["Message"] != null)
+        {
+            <p class="text-green-600 mt-4">@TempData["Message"]</p>
+        }
+    </form>
+</div>

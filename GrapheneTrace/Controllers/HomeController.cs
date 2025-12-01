@@ -9,6 +9,7 @@ using System.Text;
 using GrapheneTrace.Models;
 using GrapheneTrace.ViewModels;
 
+
 namespace GrapheneTrace.Controllers
 {
     public class AdminRequestInput
@@ -291,6 +292,142 @@ namespace GrapheneTrace.Controllers
                 return StatusCode(500, "Server error loading dated data.");
             }
         }
+
+
+        public IActionResult Medications(string patientId = "d13043b3")
+        {
+            var model = new MedicationViewModel
+            {
+                PatientId = patientId,
+
+                // STATIC LIST for now — you can later load from CSV or database
+                Medications = new List<string>
+        {
+            "Ibuprofen - Once daily",
+            "Hydrocolloid dressings - Twice daily",
+            "Sudocrem® - Once nightly "
+        }
+            };
+
+            return View(model);
+        }
+
+        public IActionResult ViewAlerts(string patientId = "d13043b3")
+        {
+            string dataRoot = Path.Combine(_hostingEnvironment.WebRootPath, "GTLBData");
+            var model = new AlertViewModel { PatientId = patientId };
+
+            try
+            {
+                var latestFile = Directory.GetFiles(dataRoot, $"{patientId}_*.csv")
+                                          .OrderByDescending(f => f)
+                                          .FirstOrDefault();
+
+                if (latestFile == null)
+                {
+                    model.Alerts.Add("No data found for this patient.");
+                    return View("Alerts", model);
+                }
+
+                var frames = LoadAllFrames(latestFile);
+
+                for (int f = 0; f < frames.Count; f++)
+                {
+                    int maxPressure = 0;
+
+                    foreach (var row in frames[f])
+                        foreach (var val in row)
+                            if (val > maxPressure)
+                                maxPressure = val;
+
+                    if (maxPressure >= 380) // Same alert threshold as your constants
+                    {
+                        model.Alerts.Add($"⚠️ Alert at Frame {f}: Peak Pressure = {maxPressure} mmHg");
+                    }
+                }
+
+                if (model.Alerts.Count == 0)
+                    model.Alerts.Add("No alerts detected. Pressure remained within safe limits.");
+            }
+            catch
+            {
+                model.Alerts.Add("Error loading alert data.");
+            }
+
+            return View("Alerts", model);
+        }
+
+
+        public IActionResult SignOut()
+        {
+            // You are not using ASP.NET Identity, so no real logout is needed.
+            // Just redirect to login page.
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        public IActionResult Search(string searchQuery)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+                return RedirectToAction("Patient", new { patientId = "d13043b3" });
+
+            searchQuery = searchQuery.Trim().ToLower();
+
+            // ===== SEARCH FOR ALERTS =====
+            if (searchQuery.Contains("alert") ||
+                searchQuery.Contains("pressure") ||
+                searchQuery.Contains("high"))
+            {
+                return RedirectToAction("ViewAlerts", new { patientId = "d13043b3" });
+            }
+
+            // ===== SEARCH FOR MEDICATIONS =====
+            if (searchQuery.Contains("med") ||
+                searchQuery.Contains("drug") ||
+                searchQuery.Contains("tablet") ||
+                searchQuery.Contains("prescription"))
+            {
+                return RedirectToAction("Medications", new { patientId = "d13043b3" });
+            }
+
+            // ===== SEARCH FOR FEEDBACK =====
+            if (searchQuery.Contains("feedback") ||
+                searchQuery.Contains("comment") ||
+                searchQuery.Contains("note"))
+            {
+                // This opens Patient Dashboard AND auto-opens Feedback section
+                TempData["OpenFeedback"] = true;
+                return RedirectToAction("Patient", new { patientId = "d13043b3" });
+            }
+
+            // ===== SEARCH FOR DOCTORS =====
+            if (searchQuery.Contains("carson") || searchQuery.Contains("ben"))
+            {
+                TempData["HighlightDoctor"] = "Ben Carson";
+                return RedirectToAction("Patient", new { patientId = "d13043b3" });
+            }
+
+            if (searchQuery.Contains("cuddy") || searchQuery.Contains("lisa"))
+            {
+                TempData["HighlightDoctor"] = "Lisa Cuddy";
+                return RedirectToAction("Patient", new { patientId = "d13043b3" });
+            }
+
+            // ===== SEARCH FOR DASHBOARD =====
+            if (searchQuery.Contains("heat") ||
+                searchQuery.Contains("dashboard") ||
+                searchQuery.Contains("main"))
+            {
+                return RedirectToAction("Patient", new { patientId = "d13043b3" });
+            }
+
+            // DEFAULT → go to dashboard
+            return RedirectToAction("Patient", new { patientId = "d13043b3" });
+        }
+
+
+
+
 
         // --- MULTI-FRAME CSV LOADER ---
         private List<List<List<int>>> LoadAllFrames(string path)

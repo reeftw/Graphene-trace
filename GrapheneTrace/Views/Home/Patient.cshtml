@@ -13,102 +13,166 @@
         <button class="menu-toggle-btn" onclick="toggleMenu('left-menu')">☰</button>
 
         <form asp-controller="Home" asp-action="Search" method="post" class="search-bar-form">
-            <input type="text" name="searchQuery" placeholder="Search for information, doctors, or alerts..." class="search-input" />
+            <input type="text" name="searchQuery" placeholder="Search alerts, medications, doctors, feedback..." class="search-input" />
         </form>
 
         <div class="top-bar-actions">
-            <a href="/Settings" class="icon-btn">⚙️ Settings</a>
-            <a asp-action="SignOut" class="icon-btn">🚪 Sign Out</a>
+            <a asp-controller="Home" asp-action="SignOut" class="icon-btn"> Sign Out</a>
             <button class="profile-toggle-btn" onclick="toggleMenu('right-profile')">
                 <div class="user-icon-placeholder">👤</div>
             </button>
         </div>
     </header>
 
-    <!-- MAIN DASHBOARD -->
+    <!-- MAIN CONTENT WRAPPER -->
     <div class="px-10 pt-8" id="dashboardSection">
 
-        <!-- HEATMAP + GRAPH -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- ========== DASHBOARD VIEW (HEATMAP + GRAPH + METRICS) ========== -->
+        <div id="dashboardView">
 
-            <!-- HEATMAP -->
-            <div class="bg-white rounded-2xl shadow-md p-4 relative">
-                <h2 class="text-xl font-semibold mb-3">Live Pressure Heatmap</h2>
+            <!-- HEATMAP + GRAPH -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                <div class="rounded-xl overflow-hidden border">
-                    @await Html.PartialAsync("_HeatmapPartial", Model.Heatmap)
+                <!-- HEATMAP -->
+                <div class="bg-white rounded-2xl shadow-md p-4 relative">
+                    <h2 class="text-xl font-semibold mb-3">Live Pressure Heatmap</h2>
+
+                    <div class="flex rounded-xl overflow-hidden border bg-white">
+
+    
+                       <div id="heatmapContainer" class="p-2">
+                           @await Html.PartialAsync("_HeatmapPartial", Model.Heatmap)
+                        </div>
+
+    
+                        <div class="flex flex-col justify-center items-start p-4 w-1/2">
+                            <h3 class="text-md font-semibold mb-3">Pressure Levels</h3>
+
+                        <div class="flex items-center mb-2">
+                            <div style="width:20px;height:20px;background-color:#7f1d1d;" class="mr-2 rounded"></div>
+                            <span class="text-sm text-gray-700">Very High Pressure</span>
+                        </div>
+
+                        <div class="flex items-center mb-2">
+                            <div style="width:20px;height:20px;background-color:#b91c1c;" class="mr-2 rounded"></div>
+                            <span class="text-sm text-gray-700">High Pressure</span>
+                        </div>
+
+                        <div class="flex items-center mb-2">
+                            <div style="width:20px;height:20px;background-color:#f97316;" class="mr-2 rounded"></div>
+                            <span class="text-sm text-gray-700">Medium Pressure</span>
+                        </div>
+
+                        <div class="flex items-center mb-2">
+                            <div style="width:20px;height:20px;background-color:#06b6d4;" class="mr-2 rounded"></div>
+                            <span class="text-sm text-gray-700">Low Pressure</span>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div style="width:20px;height:20px;background-color:#0f172a;" class="mr-2 rounded"></div>
+                            <span class="text-sm text-gray-700">Very Low Pressure</span>
+                        </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- GRAPH SECTION -->
+                <div class="bg-white rounded-2xl shadow-md p-6">
+
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <label class="mr-2 font-semibold">Measurement:</label>
+                            <select class="border rounded-lg px-2 py-1">
+                                <option>Peak Pressure</option>
+                                <option>Contact Area</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="mr-2 font-semibold">Select Date:</label>
+                            <input id="dataDatePicker" type="date" class="border rounded-lg px-2 py-1 cursor-pointer" />
+                        </div>
+                    </div>
+
+                    <div class="w-full h-64">
+                        <canvas id="peakPressureChart"></canvas>
+                    </div>
+
+                    <input id="frameSlider" type="range"
+                           min="0"
+                           max="@(Model.Heatmap.TotalFrames > 0 ? Model.Heatmap.TotalFrames - 1 : 0)"
+                           value="0"
+                           class="w-full mt-4 accent-blue-500" />
+
+                    <div class="flex justify-between mt-4 text-gray-500 text-xs">
+                        <span>Frame 0</span>
+                        <span>Mid</span>
+                        <span>Last</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- GRAPH + CONTROLS -->
-            <div class="bg-white rounded-2xl shadow-md p-6">
-
-                <!-- Header controls -->
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <label class="mr-2 font-semibold">Measurement:</label>
-                        <select class="border rounded-lg px-2 py-1">
-                            <option>Peak Pressure</option>
-                            <option>Contact Area</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="mr-2 font-semibold">Select Date:</label>
-                        <input id="dataDatePicker"
-                               type="date"
-                               class="border rounded-lg px-2 py-1 cursor-pointer" />
-                    </div>
+            <!-- METRIC CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                    <h3 class="text-gray-600">Risk Score</h3>
+                    <p id="metric-risk" class="text-4xl font-bold text-blue-600 mt-2">
+                        @(Model.Heatmap.IsAlertGenerated ? "7.3" : "3.1")<span class="text-xl">/10</span>
+                    </p>
                 </div>
 
-                <!-- Peak pressure graph -->
-                <div class="w-full h-64">
-                    <canvas id="peakPressureChart"></canvas>
+                <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                    <h3 class="text-gray-600">Contact Area</h3>
+                    <p id="metric-contact" class="text-4xl font-bold text-blue-600 mt-2">
+                        @Model.Heatmap.ContactAreaPercent%
+                    </p>
                 </div>
 
-                <!-- Slider scrubber for frames -->
-                <input id="frameSlider"
-                       type="range"
-                       min="0"
-                       max="@(Model.Heatmap.TotalFrames > 0 ? Model.Heatmap.TotalFrames - 1 : 0)"
-                       value="0"
-                       class="w-full mt-4 accent-blue-500" />
-
-                <!-- Simple frame labels -->
-                <div class="flex justify-between mt-4 text-gray-500 text-xs">
-                    <span>Frame 0</span>
-                    <span>Mid</span>
-                    <span>Last</span>
+                <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+                    <h3 class="text-gray-600">Peak Pressure</h3>
+                    <p id="metric-peak" class="text-4xl font-bold text-blue-600 mt-2">
+                        @Model.Heatmap.PeakPressureIndex<span class="text-xl"> mmHg</span>
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- METRIC CARDS -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
-                <h3 class="text-gray-600">Risk Score</h3>
-                <p id="metric-risk" class="text-4xl font-bold text-blue-600 mt-2">
-                    @(Model.Heatmap.IsAlertGenerated ? "7.3" : "3.1")<span class="text-xl">/10</span>
-                </p>
-            </div>
+        <!-- ========== FEEDBACK VIEW ========== -->
+        <div id="feedbackView" class="mt-8" style="display:none;">
+            <div class="bg-white rounded-2xl shadow-md p-6">
 
-            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
-                <h3 class="text-gray-600">Contact Area</h3>
-                <p id="metric-contact" class="text-4xl font-bold text-blue-600 mt-2">
-                    @Model.Heatmap.ContactAreaPercent%
-                </p>
-            </div>
+                <h2 class="text-xl font-semibold mb-4">Clinician Feedback</h2>
 
-            <div class="bg-white rounded-2xl shadow-md p-6 text-center">
-                <h3 class="text-gray-600">Peak Pressure</h3>
-                <p id="metric-peak" class="text-4xl font-bold text-blue-600 mt-2">
-                    @Model.Heatmap.PeakPressureIndex<span class="text-xl"> mmHg</span>
+                <p class="text-gray-500 text-sm mb-4">
+                    Feedback entries recorded for this patient.
                 </p>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-left">
+                                <th class="px-3 py-2 border">Timestamp</th>
+                                <th class="px-3 py-2 border">File Name</th>
+                                <th class="px-3 py-2 border">Comment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedbackTableBody">
+                            <tr>
+                                <td colspan="3" class="px-3 py-4 text-center text-gray-400">
+                                    Loading feedback...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <!-- LEFT MENU -->
+    <!-- LEFT POP-UP MENU -->
     <div id="left-menu" class="pop-up-menu left-menu-pop-up">
         <div class="pop-up-header">
             <h2>@Model.PatientName</h2>
@@ -117,17 +181,32 @@
 
         <ul class="menu-top-list">
 
-            <!-- NEW BUTTON -->
             <li>
-                <button onclick="showDashboardSection()" 
-                        class="w-full text-left py-3 font-medium hover:text-blue-600">
-                    🔥 View Heat Map
+                <button onclick="showDashboardSection()" class="w-full text-left py-3 font-medium hover:text-blue-600">
+                    View Heat Map
                 </button>
             </li>
 
-            <li><a href="#">View Clinician Feedback</a></li>
-            <li><a href="#">View Alerts @(Model.HasNewAlerts ? "🔴" : "")</a></li>
-            <li><a href="#">View Medications</a></li>
+            <li>
+                <button onclick="showFeedbackSection()" class="w-full text-left py-3 font-medium hover:text-blue-600">
+                    View Clinician Feedback
+                </button>
+            </li>
+
+            <li>
+                <a href="/Home/ViewAlerts?patientId=@Model.Heatmap.PatientId"
+                   class="w-full text-left py-3 font-medium hover:text-blue-600">
+                    View Alerts
+                </a>
+            </li>
+
+            <li>
+                <a href="/Home/Medications?patientId=@Model.Heatmap.PatientId"
+                   class="w-full text-left py-3 font-medium hover:text-blue-600">
+                    View Medications
+                </a>
+            </li>
+
         </ul>
 
         <div class="menu-footer">
@@ -147,16 +226,23 @@
             <h2>Patient Profile</h2>
             <button onclick="toggleMenu('right-profile')" class="close-btn">X</button>
         </div>
+
         <div class="profile-details">
-            <p><strong>User ID:</strong> @Model.UserId</p>
+            <p><strong>User ID:</strong> @Model.Heatmap.PatientId</p>
             <p><strong>Email:</strong> @Model.Email</p>
             <p><strong>Phone:</strong> @Model.PhoneNumber</p>
             <p><strong>Medical History:</strong> @Model.MedicalHistorySummary</p>
         </div>
-        <a href="/Account/Manage" class="manage-account-btn">Manage Account</a>
+
+        <a href="/Account/Manage?userId=@Model.Heatmap.PatientId&email=@Model.Email&phone=@Model.PhoneNumber&medical=@Model.MedicalHistorySummary"
+           class="manage-account-btn">
+            Manage Account
+        </a>
     </div>
 
 </div>
+
+<!-- ================= JAVASCRIPT ================= -->
 
 <script>
     function toggleMenu(menuId) {
@@ -165,10 +251,85 @@
     }
 
     function showDashboardSection() {
-        toggleMenu('left-menu');
-        const section = document.getElementById('dashboardSection');
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const leftMenu = document.getElementById('left-menu');
+        if (leftMenu.classList.contains('open')) leftMenu.classList.remove('open');
+
+        document.getElementById('dashboardView').style.display = 'block';
+        document.getElementById('feedbackView').style.display = 'none';
     }
+
+    let feedbackLoaded = false;
+
+    function showFeedbackSection() {
+        const leftMenu = document.getElementById('left-menu');
+        if (leftMenu.classList.contains('open')) leftMenu.classList.remove('open');
+
+        document.getElementById('dashboardView').style.display = 'none';
+        document.getElementById('feedbackView').style.display = 'block';
+
+        loadFeedbackIfNeeded();
+    }
+
+    function loadFeedbackIfNeeded() {
+        if (feedbackLoaded) return;
+
+        const PATIENT_ID = "@Model.Heatmap.PatientId";
+        const tbody = document.getElementById("feedbackTableBody");
+
+        fetch('/Home/GetAllComments')
+            .then(r => r.json())
+            .then(data => {
+                const rows = data.filter(x => x.patientId === PATIENT_ID);
+
+                tbody.innerHTML = "";
+
+                if (!rows.length) {
+                    tbody.innerHTML =
+                        `<tr><td colspan="3" class="px-3 py-4 text-center text-gray-400">
+                            No feedback available for this patient.
+                         </td></tr>`;
+                    return;
+                }
+
+                rows.forEach(row => {
+                    const d = row.timestamp ? new Date(row.timestamp) : null;
+
+                    const tr = `
+                        <tr>
+                            <td class="px-3 py-2 border">${d ? d.toLocaleString() : row.timestamp}</td>
+                            <td class="px-3 py-2 border">${row.fileName}</td>
+                            <td class="px-3 py-2 border">${row.comment}</td>
+                        </tr>`;
+
+                    tbody.insertAdjacentHTML("beforeend", tr);
+                });
+
+                feedbackLoaded = true;
+            })
+            .catch(() => {
+                tbody.innerHTML =
+                    `<tr><td colspan="3" class="px-3 py-4 text-center text-red-500">
+                        Error loading feedback.
+                     </td></tr>`;
+            });
+    }
+
+    // AUTO OPEN FEEDBACK (Search triggered)
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const openFeedback = "@TempData["OpenFeedback"]";
+        if (openFeedback === "True") {
+            showFeedbackSection();
+        }
+
+        const highlightedDoctor = "@TempData["HighlightDoctor"]";
+        if (highlightedDoctor && highlightedDoctor !== "") {
+            alert("Doctor found: " + highlightedDoctor);
+        }
+
+    });
+
+    // ------- Existing JS for Heatmap & Graph ---------
 
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -196,16 +357,14 @@
         }
 
         function updateHeatmap(frameIndex) {
-            if (!window.frames || !window.frames.length) return;
+            if (!window.frames?.length) return;
             const frame = window.frames[frameIndex];
             const rows = document.querySelectorAll("#heatmapContainer table tr");
-            if (!rows.length) return;
 
-            for (let i = 0; i < 32 && i < rows.length; i++) {
+            for (let i = 0; i < 32; i++) {
                 const cells = rows[i].children;
-                for (let j = 0; j < 32 && j < cells.length; j++) {
-                    const v = frame[i][j];
-                    cells[j].style.backgroundColor = jsGetColor(v);
+                for (let j = 0; j < 32; j++) {
+                    cells[j].style.backgroundColor = jsGetColor(frame[i][j]);
                 }
             }
         }
@@ -217,108 +376,72 @@
         function computePeakDataFromFrames() {
             peakData = [];
             labels = [];
-            if (!window.frames || !window.frames.length) return;
+
+            if (!window.frames?.length) return;
 
             for (let f = 0; f < window.frames.length; f++) {
                 const frame = window.frames[f];
                 let maxVal = 0;
-                for (let i = 0; i < frame.length; i++) {
-                    for (let j = 0; j < frame[i].length; j++) {
-                        const v = frame[i][j];
-                        if (v > maxVal) maxVal = v;
-                    }
-                }
+
+                for (let i = 0; i < 32; i++)
+                    for (let j = 0; j < 32; j++)
+                        if (frame[i][j] > maxVal) maxVal = frame[i][j];
+
                 peakData.push(maxVal);
                 labels.push("F" + f);
             }
         }
 
         function createPeakChart() {
-            if (!chartCanvas) return;
-            const ctx = chartCanvas.getContext("2d");
-            if (!ctx) return;
+            if (peakChart) peakChart.destroy();
 
-            if (peakChart) {
-                peakChart.destroy();
-            }
-
-            peakChart = new Chart(ctx, {
+            peakChart = new Chart(chartCanvas.getContext("2d"), {
                 type: "line",
                 data: {
                     labels: labels,
                     datasets: [{
                         label: "Peak Pressure (mmHg)",
                         data: peakData,
-                        fill: false,
-                        tension: 0.3,
                         borderWidth: 2,
                         borderColor: "rgba(37, 99, 235, 1)",
-                        pointRadius: 0,
-                        pointHitRadius: 6
+                        tension: 0.3,
+                        pointRadius: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { maxTicksLimit: 8 }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 20 }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
+                        y: { beginAtZero: true },
+                        x: { ticks: { maxTicksLimit: 8 } }
                     }
                 }
             });
         }
 
         if (slider) {
-            slider.addEventListener("input", function () {
-                const idx = parseInt(slider.value || "0");
-                window.currentFrame = idx;
-                updateHeatmap(idx);
+            slider.addEventListener("input", () => {
+                updateHeatmap(parseInt(slider.value));
             });
         }
 
         if (datePicker) {
-            datePicker.addEventListener("change", function () {
-                const selectedDate = datePicker.value;
-                if (!selectedDate || !PATIENT_ID) return;
-
-                fetch(`/Home/GetDataByDate?patientId=${encodeURIComponent(PATIENT_ID)}&date=${encodeURIComponent(selectedDate)}`)
-                    .then(resp => {
-                        if (!resp.ok) throw new Error("Failed to load data for date");
-                        return resp.json();
-                    })
+            datePicker.addEventListener("change", () => {
+                fetch(`/Home/GetDataByDate?patientId=${PATIENT_ID}&date=${datePicker.value}`)
+                    .then(r => r.json())
                     .then(data => {
                         window.frames = data.frames;
-                        window.totalFrames = data.frames.length;
-                        window.currentFrame = 0;
+                        slider.max = data.frames.length - 1;
+                        slider.value = 0;
 
-                        if (slider) {
-                            slider.max = Math.max(window.totalFrames - 1, 0);
-                            slider.value = "0";
-                        }
-
-                        if (contactLabel) contactLabel.textContent = data.contactAreaPercent + "%";
-                        if (peakLabel) peakLabel.textContent = data.peakPressureIndex + " mmHg";
-                        if (riskLabel) {
-                            const risk = data.isAlertGenerated ? "7.3" : "3.1";
-                            riskLabel.innerHTML = risk + "<span class='text-xl'>/10</span>";
-                        }
+                        contactLabel.textContent = data.contactAreaPercent + "%";
+                        peakLabel.textContent = data.peakPressureIndex + " mmHg";
+                        riskLabel.innerHTML = (data.isAlertGenerated ? "7.3" : "3.1") + "<span class='text-xl'>/10</span>";
 
                         updateHeatmap(0);
                         computePeakDataFromFrames();
                         createPeakChart();
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert("Could not load data for that date.");
                     });
             });
         }
@@ -327,4 +450,5 @@
         createPeakChart();
         updateHeatmap(0);
     });
+
 </script>
