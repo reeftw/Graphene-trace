@@ -26,6 +26,7 @@ namespace GrapheneTrace.Controllers
         private const string DATA_FOLDER_NAME = "wwwroot/GTLBData";
         private const string COMMENTS_FOLDER_NAME = "wwwroot/GTLBComments";
         private const string ADMIN_REQUESTS_FOLDER_NAME = "AppData/AdminRequests";
+        private const string MEDICATIONS_FOLDER_NAME = "GTLBMeds";
 
         private const int MATRIX_SIZE = 32;
         private const int ALERT_THRESHOLD = 200;
@@ -658,6 +659,37 @@ namespace GrapheneTrace.Controllers
             {
                 _logger.LogError(ex, "Failed to submit admin request");
                 return StatusCode(500, new { message = "Failed to submit request" });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SaveMedication(string patientId, string medicationText, string clinicianId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(patientId) || string.IsNullOrWhiteSpace(medicationText))
+                    return BadRequest("Patient ID and medication text are required");
+
+                string medsDir = Path.Combine(_hostingEnvironment.WebRootPath ?? _hostingEnvironment.ContentRootPath, MEDICATIONS_FOLDER_NAME);
+                if (!Directory.Exists(medsDir)) Directory.CreateDirectory(medsDir);
+
+                string medsFile = Path.Combine(medsDir, $"{patientId}_meds.csv");
+                if (!System.IO.File.Exists(medsFile))
+                {
+                    System.IO.File.WriteAllText(medsFile, "Timestamp,ClinicianId,PatientId,Medications\n", Encoding.UTF8);
+                }
+
+                string safeText = medicationText.Replace("\"", "\"\"");
+                string safeClinician = string.IsNullOrWhiteSpace(clinicianId) ? "unknown" : clinicianId;
+                string line = $"{DateTime.UtcNow:o},{safeClinician},{patientId},\"{safeText}\"\n";
+
+                System.IO.File.AppendAllText(medsFile, line, Encoding.UTF8);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save medication for {Patient}", patientId);
+                return StatusCode(500, "Failed to save medication");
             }
         }
     }
