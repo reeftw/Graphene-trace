@@ -35,6 +35,11 @@
                         <p class="text-indigo-600">CLN0009</p>
                     </div>
 
+                    <button id="toggleDarkMode"
+                            class="w-full text-left px-4 py-3 text-gray-800 hover:bg-gray-100 text-sm font-medium border-b">
+                        Enable Dark Mode
+                    </button>
+
                     <button id="signOutBtn"
                             class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 text-sm font-medium">
                         Sign Out
@@ -66,6 +71,11 @@
                 <button id="prevCommentsButton"
                         class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">
                     Previous Comments
+                </button>
+
+                <button id="sendMedsButton"
+                        class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">
+                    Send Medications
                 </button>
             </nav>
         </aside>
@@ -158,7 +168,76 @@
 
         </div>
     </div>
+
+    <!-- MEDICATIONS MODAL -->
+    <div id="medsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-2xl max-w-md w-full">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold text-gray-800">Send Medications</h3>
+                <button id="closeMedsModal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+
+            <form id="medsForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="medPatientSelect">Select patient</label>
+                    <select id="medPatientSelect"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Loading patients...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="medPatientIdInput">Or enter patient ID</label>
+                    <input id="medPatientIdInput" type="text" placeholder="e.g., 1c0fd777"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="medTextArea">Medications</label>
+                    <textarea id="medTextArea" rows="4" placeholder="List medications and instructions..."
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+
+                <div id="medsSuccess" class="hidden text-sm text-green-600 p-3 bg-green-50 rounded-md"></div>
+                <div id="medsError" class="hidden text-sm text-red-600 p-3 bg-red-50 rounded-md"></div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancelMedsBtn"
+                            class="px-5 py-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        Send
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<style>
+/* Simple dark mode overrides */
+body.dark-mode { background-color: #0b1220; color: #e5e7eb; }
+body.dark-mode .bg-white, body.dark-mode .bg-white-100, body.dark-mode .bg-gray-50 { background-color: #0f172a !important; color: #e5e7eb; }
+body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 { color: #e5e7eb !important; }
+body.dark-mode .border, body.dark-mode .border-gray-200, body.dark-mode .border-gray-300, body.dark-mode .border-gray-100 { border-color: #1e293b !important; }
+body.dark-mode .shadow-inner, body.dark-mode .shadow, body.dark-mode .shadow-md, body.dark-mode .shadow-lg { box-shadow: none !important; }
+body.dark-mode button.bg-blue-600 { background-color: #1f2937 !important; color: #e5e7eb !important; border: 1px solid #334155; }
+body.dark-mode button.hover\:bg-blue-700:hover { background-color: #0b1220 !important; }
+body.dark-mode .rounded-lg, body.dark-mode .rounded-xl { background-color: #0f172a; }
+body.dark-mode .bg-red-50 { background-color: #2f1b1b !important; }
+body.dark-mode .bg-green-50 { background-color: #1b2f1f !important; }
+body.dark-mode .bg-emerald-100, body.dark-mode .bg-red-100 { background-color: #1f2937 !important; color: #e5e7eb !important; }
+body.dark-mode .text-emerald-700, body.dark-mode .text-red-700 { color: #e5e7eb !important; }
+body.dark-mode input, body.dark-mode textarea, body.dark-mode select { background-color: #0b1220; color: #e5e7eb; border-color: #1f2937; }
+body.dark-mode .bg-black { background-color: #000 !important; }
+body.dark-mode #heatmapModal .bg-white { background-color: #0f172a !important; }
+body.dark-mode #heatmapModal h2, body.dark-mode #heatmapModal p, body.dark-mode #heatmapModal span { color: #e5e7eb !important; }
+body.dark-mode #heatmapModal table td { border-color: #1e293b !important; }
+body.dark-mode #heatmapModal .text-gray-500 { color: #cbd5e1 !important; }
+body.dark-mode #heatmapModal .bg-gray-50 { background-color: #0b1220 !important; }
+</style>
 
 @section Scripts {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -166,9 +245,12 @@
 <script>
 $(document).ready(function () {
 
-    // ===========================
+    const clinicianId = 'CLN0009';
+    const darkKey = 'gt-dark-mode';
+    applyDarkMode(localStorage.getItem(darkKey) === '1');
+    
     // PROFILE POPUP
-    // ===========================
+    
     $('#profileBtn').on('click', function () {
         $('#profileMenu').toggleClass('hidden');
     });
@@ -208,6 +290,12 @@ $(document).ready(function () {
         $('#adminModal').removeClass('hidden');
     });
 
+    $('#toggleDarkMode').on('click', function () {
+        const enabled = !$('body').hasClass('dark-mode');
+        applyDarkMode(enabled);
+        localStorage.setItem(darkKey, enabled ? '1' : '0');
+    });
+
     $('#closeModalBtn, #cancelBtn').on('click', function () {
         $('#adminModal').addClass('hidden');
     });
@@ -229,6 +317,57 @@ $(document).ready(function () {
 
         $('#successMessage').text('Request submitted!').removeClass('hidden');
         setTimeout(() => $('#adminModal').addClass('hidden'), 1500);
+    });
+
+    $('#sendMedsButton').on('click', function () {
+        populateMedPatientsSelect();
+        $('#medPatientIdInput').val(selectedPatientId || '');
+        $('#medTextArea').val('');
+        $('#medsSuccess, #medsError').addClass('hidden').text('');
+        $('#medsModal').removeClass('hidden');
+    });
+
+    $('#medsModal').on('click', function (e) {
+        if (e.target === this) hideMedsModal();
+    });
+
+    $('#closeMedsModal, #cancelMedsBtn').on('click', function () {
+        hideMedsModal();
+    });
+
+    $('#medPatientSelect').on('change', function () {
+        const val = $(this).val();
+        if (val) $('#medPatientIdInput').val(val);
+    });
+
+    $('#medsForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const patientId = (($('#medPatientIdInput').val() || $('#medPatientSelect').val() || '').trim()).toLowerCase();
+        const medText = ($('#medTextArea').val() || '').trim();
+
+        $('#medsSuccess, #medsError').addClass('hidden').text('');
+
+        if (!patientId || !medText) {
+            $('#medsError').text('Patient ID and medications are required.').removeClass('hidden');
+            return;
+        }
+
+        $.post('/Home/SaveMedication', {
+            patientId: patientId,
+            medicationText: medText,
+            clinicianId: clinicianId
+        })
+        .done(function () {
+            $('#medsSuccess').text('Medications sent and saved.').removeClass('hidden');
+            setTimeout(() => {
+                hideMedsModal();
+                $('#medsForm')[0].reset();
+            }, 1200);
+        })
+        .fail(function () {
+            $('#medsError').text('Failed to send medications. Try again.').removeClass('hidden');
+        });
     });
 
     $('#patientList').on('click', '.viewHeatmapBtn', function () {
@@ -291,6 +430,7 @@ function fetchPatientGroups() {
         .done(function (data) {
             patientDataCache = normalizePatients(data || []);
             renderPatients(patientDataCache);
+            populateMedPatientsSelect();
         })
         .fail(function () {
             $('#patientList').html('<div class="bg-red-50 p-6 rounded text-red-700 text-center">Failed to load data.</div>');
@@ -497,6 +637,33 @@ function showCommentsModal() {
 
 function closeCommentsModal() {
     $('#commentsModal').addClass('hidden');
+}
+
+function populateMedPatientsSelect() {
+    const select = $('#medPatientSelect');
+    if (!select.length) return;
+
+    select.empty();
+    select.append('<option value=\"\">Select patient</option>');
+
+    patientDataCache.forEach(p => {
+        select.append(`<option value=\"${p.patientId}\">${p.patientId}</option>`);
+    });
+
+    const defaultId = selectedPatientId || '';
+    if (defaultId) {
+        select.val(defaultId);
+        $('#medPatientIdInput').val(defaultId);
+    }
+}
+
+function hideMedsModal() {
+    $('#medsModal').addClass('hidden');
+}
+
+function applyDarkMode(enabled) {
+    $('body').toggleClass('dark-mode', enabled);
+    $('#toggleDarkMode').text(enabled ? 'Light Mode' : ' Dark Mode');
 }
 
 function initializeHeatmapControls() {
