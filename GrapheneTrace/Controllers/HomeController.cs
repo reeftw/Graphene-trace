@@ -299,19 +299,60 @@ namespace GrapheneTrace.Controllers
         {
             var model = new MedicationViewModel
             {
-                PatientId = patientId,
-
-                // STATIC LIST for now — you can later load from CSV or database
-                Medications = new List<string>
-        {
-            "Ibuprofen - Once daily",
-            "Hydrocolloid dressings - Twice daily",
-            "Sudocrem® - Once nightly "
-        }
+                PatientId = patientId
             };
+
+            try
+            {
+                string medsDir = Path.Combine(
+                    _hostingEnvironment.WebRootPath ?? _hostingEnvironment.ContentRootPath,
+                    MEDICATIONS_FOLDER_NAME
+                );
+
+                string medsFile = Path.Combine(medsDir, $"{patientId}_meds.csv");
+
+                if (!System.IO.File.Exists(medsFile))
+                {
+                    // No meds yet → empty list
+                    return View(model);
+                }
+
+                var lines = System.IO.File.ReadAllLines(medsFile);
+
+                // Skip header
+                foreach (var line in lines.Skip(1))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    // CSV format:
+                    // Timestamp,ClinicianId,PatientId,"Medications"
+                    var parts = line.Split(',');
+
+                    if (parts.Length >= 4)
+                    {
+                        // Join remaining parts (in case medication text has commas)
+                        var medicationText = string.Join(",", parts.Skip(3)).Trim();
+
+                        // Remove quotes
+                        if (medicationText.StartsWith("\"") && medicationText.EndsWith("\""))
+                        {
+                            medicationText = medicationText
+                                .Substring(1, medicationText.Length - 2)
+                                .Replace("\"\"", "\"");
+                        }
+
+                        model.Medications.Add(medicationText);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load medications for {Patient}", patientId);
+            }
 
             return View(model);
         }
+
 
         public IActionResult ViewAlerts(string patientId = "d13043b3")
         {

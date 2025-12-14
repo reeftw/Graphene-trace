@@ -22,11 +22,11 @@ namespace GrapheneTrace.Controllers
             return View("~/Views/Home/Admin.cshtml");
         }
 
-// =========================================================
+        // =========================================================
         // 1. READ CLINICIANS (Now ignores deleted files)
         // =========================================================
         [HttpGet]
-[HttpGet]
+        [HttpGet]
         public IActionResult GetClinicianList()
         {
             var results = new List<object>(); // Returning objects now
@@ -43,7 +43,7 @@ namespace GrapheneTrace.Controllers
                     try
                     {
                         var lines = System.IO.File.ReadAllLines(file);
-                        
+
                         // Default values
                         string title = "-", first = "-", middle = "-", last = "-", id = "-", created = "-";
 
@@ -66,11 +66,16 @@ namespace GrapheneTrace.Controllers
 
                         if (!string.IsNullOrEmpty(first))
                         {
-                            results.Add(new { 
+                            results.Add(new
+                            {
                                 type = "clinician",
                                 gtid = gtid, // The filename ID (for deletion)
                                 displayId = id, // The manual ID Number
-                                title, first, middle, last, created 
+                                title,
+                                first,
+                                middle,
+                                last,
+                                created
                             });
                         }
                     }
@@ -86,16 +91,16 @@ namespace GrapheneTrace.Controllers
         [HttpPost]
         public IActionResult DeleteClinician([FromBody] DeleteInput input)
         {
-            if (input == null || string.IsNullOrEmpty(input.Gtid)) 
+            if (input == null || string.IsNullOrEmpty(input.Gtid))
                 return Json(new { success = false, message = "Invalid ID" });
 
             try
             {
                 string folderPath = Path.Combine(_hostingEnvironment.WebRootPath, "clinicianDetails");
-                
+
                 // Construct the current filename
                 string currentPath = Path.Combine(folderPath, $"{input.Gtid}.txt");
-                
+
                 // Construct the new "soft deleted" filename
                 string newPath = Path.Combine(folderPath, $"{input.Gtid}-deleted.txt");
 
@@ -114,7 +119,7 @@ namespace GrapheneTrace.Controllers
             {
                 return Json(new { success = false, message = ex.Message });
             }
-        }        
+        }
         // =========================================================
         // 2. ADD CLINICIAN (Generates 8-char Alphanumeric GTID)
         // =========================================================
@@ -163,7 +168,7 @@ namespace GrapheneTrace.Controllers
         // 5. READ PATIENTS (Now looks for "ID:" instead of GTID)
         // =========================================================
         [HttpGet]
-[HttpGet]
+        [HttpGet]
         public IActionResult GetPatientList()
         {
             var results = new List<object>();
@@ -199,11 +204,16 @@ namespace GrapheneTrace.Controllers
                         {
                             if (id == "-") id = Path.GetFileNameWithoutExtension(file);
 
-                            results.Add(new { 
+                            results.Add(new
+                            {
                                 type = "patient",
                                 gtid = id, // For patients, the ID is the GTID/Filename
                                 displayId = id,
-                                title, first, middle, last, created 
+                                title,
+                                first,
+                                middle,
+                                last,
+                                created
                             });
                         }
                     }
@@ -229,7 +239,7 @@ namespace GrapheneTrace.Controllers
                 if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
                 string filePath = Path.Combine(folderPath, $"{generatedId}.txt");
-                
+
                 // UPDATED DATE FORMAT HERE: dd/MM/yyyy HH:mm:ss
                 string content = $"ID: {generatedId}\n" +
                                  $"Title: {data.Title}\n" +
@@ -290,7 +300,7 @@ namespace GrapheneTrace.Controllers
         public IActionResult GetAdminRequests()
         {
             var requests = new List<object>();
-            
+
             // Look in AppData/AdminRequests
             string appData = Path.Combine(_hostingEnvironment.ContentRootPath, "AppData", "AdminRequests");
             string filePath = Path.Combine(appData, "admin_requests.csv");
@@ -306,8 +316,8 @@ namespace GrapheneTrace.Controllers
 
                     // Manual parsing because "Comment" might contain commas inside quotes
                     // Format: Timestamp,UserId,"Comment"
-                    
-                    try 
+
+                    try
                     {
                         // 1. Get Timestamp (Everything before first comma)
                         int firstComma = line.IndexOf(',');
@@ -320,9 +330,9 @@ namespace GrapheneTrace.Controllers
                         // 3. Get UserId (Everything before the NEXT comma)
                         int secondComma = remainder.IndexOf(',');
                         if (secondComma == -1) continue;
-                        
+
                         string userId = remainder.Substring(0, secondComma).Trim().Trim('"'); // Remove quotes if present
-                        
+
                         // 4. Get Comment (The rest, remove quotes)
                         string comment = remainder.Substring(secondComma + 1).Trim().Trim('"');
 
@@ -332,19 +342,20 @@ namespace GrapheneTrace.Controllers
                             timestamp = dt.ToString("MMM dd, yyyy HH:mm");
                         }
 
-                        requests.Add(new { 
-                            timestamp = timestamp, 
-                            userId = userId, 
-                            comment = comment 
+                        requests.Add(new
+                        {
+                            timestamp = timestamp,
+                            userId = userId,
+                            comment = comment
                         });
                     }
-                    catch 
-                    { 
+                    catch
+                    {
                         continue; // Skip malformed lines
                     }
                 }
             }
-            
+
             // Return latest requests first
             return Json(requests.AsEnumerable().Reverse());
         }
@@ -359,13 +370,13 @@ namespace GrapheneTrace.Controllers
         public string IdNumber { get; set; }
     }
 
-public class PatientData
-        {
-            public string Title { get; set; }
-            public string FirstName { get; set; }
-            public string MiddleName { get; set; }
-            public string LastName { get; set; }
-        }
+    public class PatientData
+    {
+        public string Title { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+    }
     public class DeleteInput
     {
         public string Gtid { get; set; }

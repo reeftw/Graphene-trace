@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj": {}
+    "/Users/anakharajthampitharajayaraj/Documents/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj": {}
   },
   "projects": {
-    "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj": {
+    "/Users/anakharajthampitharajayaraj/Documents/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
+        "projectUniqueName": "/Users/anakharajthampitharajayaraj/Documents/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
         "projectName": "PatientMetadata",
-        "projectPath": "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
+        "projectPath": "/Users/anakharajthampitharajayaraj/Documents/Graphene-trace/GrapheneTrace/Models/PatientMetadata.csproj",
         "packagesPath": "/Users/anakharajthampitharajayaraj/.nuget/packages/",
-        "outputPath": "/Users/anakharajthampitharajayaraj/Downloads/Graphene-trace/GrapheneTrace/Models/obj/",
+        "outputPath": "/Users/anakharajthampitharajayaraj/Documents/Graphene-trace/GrapheneTrace/Models/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/anakharajthampitharajayaraj/.nuget/NuGet/NuGet.Config"
