@@ -87,7 +87,6 @@ namespace GrapheneTrace.Controllers
                             PatientId = patientId,
                             GTLBData = Path.GetFileName(latestFile)
                         };
-
                         // Compute metrics from the first frame
                         CalculateMetrics(heatmapData);
 
