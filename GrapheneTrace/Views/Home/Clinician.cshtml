@@ -61,7 +61,7 @@
             </div>
 
             <nav class="space-y-4">
-                <!-- REMOVED NEW PATIENTS + EDIT PATIENTS -->
+                
                 
                 <button id="adminRequestBtn"
                         class="w-full bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all text-left">
@@ -217,7 +217,7 @@
 </div>
 
 <style>
-/* Simple dark mode overrides */
+
 body.dark-mode { background-color: #0b1220; color: #e5e7eb; }
 body.dark-mode .bg-white, body.dark-mode .bg-white-100, body.dark-mode .bg-gray-50 { background-color: #0f172a !important; color: #e5e7eb; }
 body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 { color: #e5e7eb !important; }
@@ -267,7 +267,7 @@ $(document).ready(function () {
         window.location.href = '/Home/Index';
     });
 
-    // EXISTING CODE BELOW (UNCHANGED)
+    // SIDEBAR TOGGLE
     $('#sidebarToggle').on('click', function () {
         $('#sidebar').toggleClass('hidden');
         $('#mainContent').toggleClass('col-span-9 col-span-12');
